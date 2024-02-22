@@ -17,10 +17,10 @@ NoiseMap::NoiseMap(int Width, int Height, float Scale)
 {
 	NoiseTexture = UTexture2D::CreateTransient(Width, Height, PF_B8G8R8A8, TEXT("NoiseTexture"));
 
-	FTexture2DMipMap* MipMap = &NoiseTexture->PlatformData->Mips[0];
+	FTexture2DMipMap* MipMap = &NoiseTexture->GetPlatformData()->Mips[0];
 	FByteBulkData* ImageData = &MipMap->BulkData;
-	uint8* RawImageData = (uint8*)ImageData->Lock(LOCK_READ_WRITE);
 
+	uint8* RawImageData = (uint8*)ImageData->Lock(LOCK_READ_WRITE);
 	const int PixelSize = 4;
 	const int Stride = Width * PixelSize;
 	for (int R = 0; R < Height; ++R) {
@@ -38,8 +38,8 @@ NoiseMap::NoiseMap(int Width, int Height, float Scale)
 			RawImageData[PixelIndex + 3] = 255;
 		}
 	}
-
 	ImageData->Unlock();
+	
 	NoiseTexture->UpdateResource();
 }
 

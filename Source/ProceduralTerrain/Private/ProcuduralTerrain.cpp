@@ -5,7 +5,6 @@
 #include "UObject/Object.h"
 
 #include <cassert>
-#include <HAL/FileManagerGeneric.h>
 
 // Sets default values
 AProcuduralTerrain::AProcuduralTerrain()
@@ -14,12 +13,14 @@ AProcuduralTerrain::AProcuduralTerrain()
 	PrimaryActorTick.bCanEverTick = true;
 
 	Noise = NoiseMap(500, 500, 0.5);
+	assert(Noise.NoiseTexture);
 
 	Mesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("GeneratedMesh"));
+	RootComponent = Mesh;
 
-	static ConstructorHelpers::FObjectFinder<UMaterial> FoundMaterial(TEXT("/Script/Engine.Material'/Game/TestMaterial.TestMaterial'"));
-	assert(FoundMaterial.Succeeded());
-	Material = FoundMaterial.Object;
+	Material = CreateDefaultSubobject<UMaterial>(TEXT("NoiseMaterial"));
+	MaterialInstance = UMaterialInstanceDynamic::Create(Material, nullptr);
+	assert(MaterialInstance);
 }
 
 // Called when the game starts or when spawned
@@ -28,11 +29,9 @@ void AProcuduralTerrain::BeginPlay()
 	Super::BeginPlay();
 	CreateTriangle();
 
-	MaterialInstance = UMaterialInstanceDynamic::Create(Material, Mesh);
-	assert(MaterialInstance);
-	Mesh->SetMaterial(0, MaterialInstance);
-	assert(Noise.NoiseTexture);
+	
 	MaterialInstance->SetTextureParameterValue(TEXT("NoiseTexture"), Noise.NoiseTexture);
+	Mesh->SetMaterial(0, MaterialInstance);
 }
 
 // Called every frame

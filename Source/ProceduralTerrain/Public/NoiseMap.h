@@ -14,5 +14,6 @@ public:
 	NoiseMap(int Width, int Height, float Scale);
 	~NoiseMap();
 
+	UPROPERTY()
 	UTexture2D* NoiseTexture;
 };
