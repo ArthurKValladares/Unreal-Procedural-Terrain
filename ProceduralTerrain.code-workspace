@@ -1,0 +1,613 @@
+{
+	"folders": [
+		{
+			"name": "ProceduralTerrain",
+			"path": "."
+		},
+		{
+			"name": "UE5",
+			"path": "C:\\Program Files\\Epic Games\\UE_5.3"
+		}
+	],
+	"settings": {
+		"typescript.tsc.autoDetect": "off",
+		"npm.autoDetect": "off"
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-vscode.cpptools",
+			"ms-dotnettools.csharp"
+		]
+	},
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"label": "ProceduralTerrain Win64 Debug Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"ProceduralTerrain",
+					"Win64",
+					"Debug",
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "ProceduralTerrain Win64 Debug Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"ProceduralTerrain",
+					"Win64",
+					"Debug",
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"ProceduralTerrain Win64 Debug Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "ProceduralTerrain Win64 Debug Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"ProceduralTerrain",
+					"Win64",
+					"Debug",
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "ProceduralTerrain Win64 DebugGame Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"ProceduralTerrain",
+					"Win64",
+					"DebugGame",
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "ProceduralTerrain Win64 DebugGame Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"ProceduralTerrain",
+					"Win64",
+					"DebugGame",
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"ProceduralTerrain Win64 DebugGame Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "ProceduralTerrain Win64 DebugGame Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"ProceduralTerrain",
+					"Win64",
+					"DebugGame",
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "ProceduralTerrain Win64 Development Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"ProceduralTerrain",
+					"Win64",
+					"Development",
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "ProceduralTerrain Win64 Development Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"ProceduralTerrain",
+					"Win64",
+					"Development",
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"ProceduralTerrain Win64 Development Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "ProceduralTerrain Win64 Development Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"ProceduralTerrain",
+					"Win64",
+					"Development",
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "ProceduralTerrain Win64 Test Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"ProceduralTerrain",
+					"Win64",
+					"Test",
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "ProceduralTerrain Win64 Test Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"ProceduralTerrain",
+					"Win64",
+					"Test",
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"ProceduralTerrain Win64 Test Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "ProceduralTerrain Win64 Test Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"ProceduralTerrain",
+					"Win64",
+					"Test",
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "ProceduralTerrain Win64 Shipping Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"ProceduralTerrain",
+					"Win64",
+					"Shipping",
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "ProceduralTerrain Win64 Shipping Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"ProceduralTerrain",
+					"Win64",
+					"Shipping",
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"ProceduralTerrain Win64 Shipping Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "ProceduralTerrain Win64 Shipping Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"ProceduralTerrain",
+					"Win64",
+					"Shipping",
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "ProceduralTerrainEditor Win64 Debug Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"ProceduralTerrainEditor",
+					"Win64",
+					"Debug",
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "ProceduralTerrainEditor Win64 Debug Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"ProceduralTerrainEditor",
+					"Win64",
+					"Debug",
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"ProceduralTerrainEditor Win64 Debug Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "ProceduralTerrainEditor Win64 Debug Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"ProceduralTerrainEditor",
+					"Win64",
+					"Debug",
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "ProceduralTerrainEditor Win64 DebugGame Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"ProceduralTerrainEditor",
+					"Win64",
+					"DebugGame",
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "ProceduralTerrainEditor Win64 DebugGame Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"ProceduralTerrainEditor",
+					"Win64",
+					"DebugGame",
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"ProceduralTerrainEditor Win64 DebugGame Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "ProceduralTerrainEditor Win64 DebugGame Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"ProceduralTerrainEditor",
+					"Win64",
+					"DebugGame",
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "ProceduralTerrainEditor Win64 Development Build",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"ProceduralTerrainEditor",
+					"Win64",
+					"Development",
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "ProceduralTerrainEditor Win64 Development Rebuild",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Build.bat",
+				"args": [
+					"ProceduralTerrainEditor",
+					"Win64",
+					"Development",
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"ProceduralTerrainEditor Win64 Development Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"label": "ProceduralTerrainEditor Win64 Development Clean",
+				"group": "build",
+				"command": "Engine\\Build\\BatchFiles\\Clean.bat",
+				"args": [
+					"ProceduralTerrainEditor",
+					"Win64",
+					"Development",
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			}
+		]
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "Launch ProceduralTerrain (Debug)",
+				"request": "launch",
+				"program": "C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\Binaries\\Win64\\UnrealGame-Win64-Debug.exe",
+				"preLaunchTask": "ProceduralTerrain Win64 Debug Build",
+				"args": [
+				],
+				"cwd": "C:\\Program Files\\Epic Games\\UE_5.3",
+				"stopAtEntry": false,
+				"console": "externalTerminal",
+				"type": "cppvsdbg",
+				"visualizerFile": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
+				"sourceFileMap": {
+					"D:\\build\\++UE5\\Sync": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"name": "Launch ProceduralTerrain (DebugGame)",
+				"request": "launch",
+				"program": "C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\Binaries\\Win64\\UnrealGame-Win64-DebugGame.exe",
+				"preLaunchTask": "ProceduralTerrain Win64 DebugGame Build",
+				"args": [
+				],
+				"cwd": "C:\\Program Files\\Epic Games\\UE_5.3",
+				"stopAtEntry": false,
+				"console": "externalTerminal",
+				"type": "cppvsdbg",
+				"visualizerFile": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
+				"sourceFileMap": {
+					"D:\\build\\++UE5\\Sync": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"name": "Launch ProceduralTerrain (Development)",
+				"request": "launch",
+				"program": "C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\Binaries\\Win64\\UnrealGame.exe",
+				"preLaunchTask": "ProceduralTerrain Win64 Development Build",
+				"args": [
+				],
+				"cwd": "C:\\Program Files\\Epic Games\\UE_5.3",
+				"stopAtEntry": false,
+				"console": "externalTerminal",
+				"type": "cppvsdbg",
+				"visualizerFile": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
+				"sourceFileMap": {
+					"D:\\build\\++UE5\\Sync": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"name": "Launch ProceduralTerrain (Test)",
+				"request": "launch",
+				"program": "C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\Binaries\\Win64\\UnrealGame-Win64-Test.exe",
+				"preLaunchTask": "ProceduralTerrain Win64 Test Build",
+				"args": [
+				],
+				"cwd": "C:\\Program Files\\Epic Games\\UE_5.3",
+				"stopAtEntry": false,
+				"console": "externalTerminal",
+				"type": "cppvsdbg",
+				"visualizerFile": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
+				"sourceFileMap": {
+					"D:\\build\\++UE5\\Sync": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"name": "Launch ProceduralTerrain (Shipping)",
+				"request": "launch",
+				"program": "C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\Binaries\\Win64\\UnrealGame-Win64-Shipping.exe",
+				"preLaunchTask": "ProceduralTerrain Win64 Shipping Build",
+				"args": [
+				],
+				"cwd": "C:\\Program Files\\Epic Games\\UE_5.3",
+				"stopAtEntry": false,
+				"console": "externalTerminal",
+				"type": "cppvsdbg",
+				"visualizerFile": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
+				"sourceFileMap": {
+					"D:\\build\\++UE5\\Sync": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"name": "Launch ProceduralTerrainEditor (Debug)",
+				"request": "launch",
+				"program": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Binaries\\Win64\\UnrealEditor-Win64-Debug.exe",
+				"preLaunchTask": "ProceduralTerrainEditor Win64 Debug Build",
+				"args": [
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject"
+				],
+				"cwd": "C:\\Program Files\\Epic Games\\UE_5.3",
+				"stopAtEntry": false,
+				"console": "externalTerminal",
+				"type": "cppvsdbg",
+				"visualizerFile": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
+				"sourceFileMap": {
+					"D:\\build\\++UE5\\Sync": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"name": "Launch ProceduralTerrainEditor (DebugGame)",
+				"request": "launch",
+				"program": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Binaries\\Win64\\UnrealEditor-Win64-DebugGame.exe",
+				"preLaunchTask": "ProceduralTerrainEditor Win64 DebugGame Build",
+				"args": [
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject"
+				],
+				"cwd": "C:\\Program Files\\Epic Games\\UE_5.3",
+				"stopAtEntry": false,
+				"console": "externalTerminal",
+				"type": "cppvsdbg",
+				"visualizerFile": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
+				"sourceFileMap": {
+					"D:\\build\\++UE5\\Sync": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"name": "Launch ProceduralTerrainEditor (Development)",
+				"request": "launch",
+				"program": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Binaries\\Win64\\UnrealEditor.exe",
+				"preLaunchTask": "ProceduralTerrainEditor Win64 Development Build",
+				"args": [
+					"C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject"
+				],
+				"cwd": "C:\\Program Files\\Epic Games\\UE_5.3",
+				"stopAtEntry": false,
+				"console": "externalTerminal",
+				"type": "cppvsdbg",
+				"visualizerFile": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
+				"sourceFileMap": {
+					"D:\\build\\++UE5\\Sync": "C:\\Program Files\\Epic Games\\UE_5.3"
+				}
+			},
+			{
+				"name": "Generate Project Files",
+				"type": "coreclr",
+				"request": "launch",
+				"preLaunchTask": "UnrealBuildTool Win64 Development Build",
+				"program": "C:\\Program Files\\Epic Games\\UE_5.3\\Engine\\Build\\BatchFiles\\RunUBT.bat",
+				"args": [
+					"-projectfiles",
+					"-vscode",
+					"-project=C:\\Users\\Arthur\\Documents\\Unreal Projects\\ProceduralTerrain\\ProceduralTerrain.uproject",
+					"-game",
+					"-engine",
+					"-dotnet"
+				],
+				"console": "externalTerminal",
+				"stopAtEntry": false,
+				"cwd": "C:\\Program Files\\Epic Games\\UE_5.3"
+			}
+		]
+	}
+}
