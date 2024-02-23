@@ -4,17 +4,15 @@
 #include "ProcuduralTerrain.h"
 #include "UObject/Object.h"
 
-#include <cassert>
-
 // Sets default values
 AProcuduralTerrain::AProcuduralTerrain()
 	: Mesh(CreateDefaultSubobject<UProceduralMeshComponent>("GeneratedMesh"))
 {
-	assert(Mesh);
+	check(Mesh);
 	RootComponent = Mesh;
 
 	static ConstructorHelpers::FObjectFinder<UMaterial> FoundMaterial(TEXT("/Script/Engine.Material'/Game/TestMaterial.TestMaterial'"));
-	assert(FoundMaterial.Succeeded());
+	check(FoundMaterial.Succeeded());
 	Material = FoundMaterial.Object;
 }
 
@@ -24,10 +22,10 @@ void AProcuduralTerrain::BeginPlay()
 	Super::BeginPlay();
 
 	Noise = NoiseMap(500, 500, 0.5);
-	assert(Noise.NoiseTexture);
+	check(Noise.NoiseTexture);
 
 	MaterialInstance = UMaterialInstanceDynamic::Create(Material, Mesh);
-	assert(MaterialInstance);
+	check(MaterialInstance);
 	Mesh->SetMaterial(0, MaterialInstance);
 	MaterialInstance->SetTextureParameterValue("NoiseTexture", Noise.NoiseTexture);
 
