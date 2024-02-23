@@ -9,8 +9,12 @@
 // Sets default values
 AProcuduralTerrain::AProcuduralTerrain()
 	: Mesh(CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("GeneratedMesh")))
-	, Material(CreateDefaultSubobject<UMaterial>(TEXT("NoiseMaterial")))
 {
+	RootComponent = Mesh;
+
+	static ConstructorHelpers::FObjectFinder<UMaterial> FoundMaterial(TEXT("/Script/Engine.Material'/Game/TestMaterial.TestMaterial'"));
+	assert(FoundMaterial.Succeeded());
+	Material = FoundMaterial.Object;
 }
 
 // Called when the game starts or when spawned
