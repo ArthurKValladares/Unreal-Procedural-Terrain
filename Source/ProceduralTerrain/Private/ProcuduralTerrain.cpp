@@ -9,12 +9,6 @@
 // Sets default values
 AProcuduralTerrain::AProcuduralTerrain()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
-	Noise = NoiseMap(500, 500, 0.5);
-	assert(Noise.NoiseTexture);
-
 	Mesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("GeneratedMesh"));
 	RootComponent = Mesh;
 
@@ -29,6 +23,8 @@ void AProcuduralTerrain::BeginPlay()
 	Super::BeginPlay();
 	CreateTriangle();
 
+	Noise = NoiseMap(500, 500, 0.5);
+	assert(Noise.NoiseTexture);
 	
 	MaterialInstance->SetTextureParameterValue(TEXT("NoiseTexture"), Noise.NoiseTexture);
 	Mesh->SetMaterial(0, MaterialInstance);
