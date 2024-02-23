@@ -10,29 +10,26 @@
 AProcuduralTerrain::AProcuduralTerrain()
 	: Mesh(CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("GeneratedMesh")))
 {
+	assert(Mesh);
 	RootComponent = Mesh;
 
 	static ConstructorHelpers::FObjectFinder<UMaterial> FoundMaterial(TEXT("/Script/Engine.Material'/Game/TestMaterial.TestMaterial'"));
 	assert(FoundMaterial.Succeeded());
 	Material = FoundMaterial.Object;
+
+	Noise = NoiseMap(500, 500, 0.5);
+	assert(Noise.NoiseTexture);
+
+	MaterialInstance = UMaterialInstanceDynamic::Create(Material, Mesh);
+	assert(MaterialInstance);
+	Mesh->SetMaterial(0, MaterialInstance);
+	MaterialInstance->SetTextureParameterValue(TEXT("NoiseTexture"), Noise.NoiseTexture);
 }
 
 // Called when the game starts or when spawned
 void AProcuduralTerrain::BeginPlay()
 {
 	Super::BeginPlay();
-
-	assert(Mesh);
-	assert(Material);
-
-	Noise = NoiseMap(500, 500, 0.5);
-	assert(Noise.NoiseTexture);
-
-	MaterialInstance = UMaterialInstanceDynamic::Create(Material, nullptr);
-	assert(MaterialInstance);
-
-	MaterialInstance->SetTextureParameterValue(TEXT("NoiseTexture"), Noise.NoiseTexture);
-	Mesh->SetMaterial(0, MaterialInstance);
 
 	CreateTriangle();
 }
@@ -48,29 +45,36 @@ void AProcuduralTerrain::CreateTriangle() {
 	Vertices.Add(FVector(0, 0, 0));
 	Vertices.Add(FVector(0, 100, 0));
 	Vertices.Add(FVector(0, 0, 100));
+	Vertices.Add(FVector(0, 100, 100));
 
 	TArray<int32> Triangles;
 	Triangles.Add(0);
 	Triangles.Add(1);
 	Triangles.Add(2);
+	Triangles.Add(2);
+	Triangles.Add(1);
+	Triangles.Add(3);
 
 	TArray<FVector> Normals;
+	Normals.Add(FVector(1, 0, 0));
 	Normals.Add(FVector(1, 0, 0));
 	Normals.Add(FVector(1, 0, 0));
 	Normals.Add(FVector(1, 0, 0));
 
 	TArray<FVector2D> Uv0;
 	Uv0.Add(FVector2D(0, 0));
-	Uv0.Add(FVector2D(10, 0));
-	Uv0.Add(FVector2D(0, 10));
-
+	Uv0.Add(FVector2D(1, 0));
+	Uv0.Add(FVector2D(0, 1));
+	Uv0.Add(FVector2D(1, 1));
 
 	TArray<FProcMeshTangent> Tangents;
 	Tangents.Add(FProcMeshTangent(0, 1, 0));
 	Tangents.Add(FProcMeshTangent(0, 1, 0));
 	Tangents.Add(FProcMeshTangent(0, 1, 0));
+	Tangents.Add(FProcMeshTangent(0, 1, 0));
 
 	TArray<FLinearColor> VertexColors;
+	VertexColors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
 	VertexColors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
 	VertexColors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
 	VertexColors.Add(FLinearColor(0.75, 0.75, 0.75, 1.0));
