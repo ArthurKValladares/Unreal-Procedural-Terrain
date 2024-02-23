@@ -7,13 +7,11 @@
 // Sets default values
 AProcuduralTerrain::AProcuduralTerrain()
 	: Mesh(CreateDefaultSubobject<UProceduralMeshComponent>("GeneratedMesh"))
+	, Material(CreateDefaultSubobject<UMaterial>("NoiseMaterial"))
 {
 	check(Mesh);
+	check(Material);
 	RootComponent = Mesh;
-
-	static ConstructorHelpers::FObjectFinder<UMaterial> FoundMaterial(TEXT("/Script/Engine.Material'/Game/TestMaterial.TestMaterial'"));
-	check(FoundMaterial.Succeeded());
-	Material = FoundMaterial.Object;
 }
 
 // Called when the game starts or when spawned
@@ -21,13 +19,14 @@ void AProcuduralTerrain::BeginPlay()
 {
 	Super::BeginPlay();
 
+	Mesh->SetMaterial(0, Material);
+
 	Noise = NoiseMap(500, 500, 0.5);
 	check(Noise.NoiseTexture);
 
 	MaterialInstance = UMaterialInstanceDynamic::Create(Material, Mesh);
 	check(MaterialInstance);
-	Mesh->SetMaterial(0, MaterialInstance);
-	MaterialInstance->SetTextureParameterValue("NoiseTexture", Noise.NoiseTexture);
+	//MaterialInstance->SetTextureParameterValue("NoiseTexture", Noise.NoiseTexture);
 
 	CreateTriangle();
 }
