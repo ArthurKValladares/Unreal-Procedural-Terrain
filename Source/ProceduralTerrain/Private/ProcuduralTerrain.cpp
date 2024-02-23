@@ -16,6 +16,12 @@ AProcuduralTerrain::AProcuduralTerrain()
 	static ConstructorHelpers::FObjectFinder<UMaterial> FoundMaterial(TEXT("/Script/Engine.Material'/Game/TestMaterial.TestMaterial'"));
 	assert(FoundMaterial.Succeeded());
 	Material = FoundMaterial.Object;
+}
+
+// Called when the game starts or when spawned
+void AProcuduralTerrain::BeginPlay()
+{
+	Super::BeginPlay();
 
 	Noise = NoiseMap(500, 500, 0.5);
 	assert(Noise.NoiseTexture);
@@ -24,12 +30,6 @@ AProcuduralTerrain::AProcuduralTerrain()
 	assert(MaterialInstance);
 	Mesh->SetMaterial(0, MaterialInstance);
 	MaterialInstance->SetTextureParameterValue("NoiseTexture", Noise.NoiseTexture);
-}
-
-// Called when the game starts or when spawned
-void AProcuduralTerrain::BeginPlay()
-{
-	Super::BeginPlay();
 
 	CreateTriangle();
 }
