@@ -15,7 +15,7 @@ NoiseMap::NoiseMap() {
 
 NoiseMap::NoiseMap(int Width, int Height, float Scale)
 {
-	NoiseTexture = UTexture2D::CreateTransient(Width, Height, PF_B8G8R8A8, TEXT("NoiseTexture"));
+	NoiseTexture = UTexture2D::CreateTransient(Width, Height, PF_B8G8R8A8, "NoiseTexture");
 
 	FTexture2DMipMap* MipMap = &NoiseTexture->GetPlatformData()->Mips[0];
 	FByteBulkData* ImageData = &MipMap->BulkData;

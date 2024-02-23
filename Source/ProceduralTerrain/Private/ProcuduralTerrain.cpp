@@ -8,7 +8,7 @@
 
 // Sets default values
 AProcuduralTerrain::AProcuduralTerrain()
-	: Mesh(CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("GeneratedMesh")))
+	: Mesh(CreateDefaultSubobject<UProceduralMeshComponent>("GeneratedMesh"))
 {
 	assert(Mesh);
 	RootComponent = Mesh;
@@ -23,7 +23,7 @@ AProcuduralTerrain::AProcuduralTerrain()
 	MaterialInstance = UMaterialInstanceDynamic::Create(Material, Mesh);
 	assert(MaterialInstance);
 	Mesh->SetMaterial(0, MaterialInstance);
-	MaterialInstance->SetTextureParameterValue(TEXT("NoiseTexture"), Noise.NoiseTexture);
+	MaterialInstance->SetTextureParameterValue("NoiseTexture", Noise.NoiseTexture);
 }
 
 // Called when the game starts or when spawned
