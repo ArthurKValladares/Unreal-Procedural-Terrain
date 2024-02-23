@@ -8,26 +8,29 @@
 
 // Sets default values
 AProcuduralTerrain::AProcuduralTerrain()
+	: Mesh(CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("GeneratedMesh")))
+	, Material(CreateDefaultSubobject<UMaterial>(TEXT("NoiseMaterial")))
 {
-	Mesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("GeneratedMesh"));
-	RootComponent = Mesh;
-
-	Material = CreateDefaultSubobject<UMaterial>(TEXT("NoiseMaterial"));
-	MaterialInstance = UMaterialInstanceDynamic::Create(Material, nullptr);
-	assert(MaterialInstance);
 }
 
 // Called when the game starts or when spawned
 void AProcuduralTerrain::BeginPlay()
 {
 	Super::BeginPlay();
-	CreateTriangle();
+
+	assert(Mesh);
+	assert(Material);
 
 	Noise = NoiseMap(500, 500, 0.5);
 	assert(Noise.NoiseTexture);
-	
+
+	MaterialInstance = UMaterialInstanceDynamic::Create(Material, nullptr);
+	assert(MaterialInstance);
+
 	MaterialInstance->SetTextureParameterValue(TEXT("NoiseTexture"), Noise.NoiseTexture);
 	Mesh->SetMaterial(0, MaterialInstance);
+
+	CreateTriangle();
 }
 
 // Called every frame
