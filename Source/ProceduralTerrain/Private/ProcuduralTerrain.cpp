@@ -24,7 +24,7 @@ void AProcuduralTerrain::BeginPlay()
 
 	MaterialInstance = UMaterialInstanceDynamic::Create(Material, Mesh);
 	check(MaterialInstance);
-	//MaterialInstance->SetTextureParameterValue("NoiseTexture", Noise.NoiseTexture);
+	MaterialInstance->SetTextureParameterValue("NoiseTexture", Noise.NoiseTexture);
 	Mesh->SetMaterial(0, MaterialInstance);
 
 	CreateTriangle();
