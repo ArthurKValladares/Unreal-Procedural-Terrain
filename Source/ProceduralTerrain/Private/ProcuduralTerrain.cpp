@@ -19,14 +19,13 @@ void AProcuduralTerrain::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Mesh->SetMaterial(0, Material);
-
 	Noise = NoiseMap(500, 500, 0.5);
 	check(Noise.NoiseTexture);
 
 	MaterialInstance = UMaterialInstanceDynamic::Create(Material, Mesh);
 	check(MaterialInstance);
 	//MaterialInstance->SetTextureParameterValue("NoiseTexture", Noise.NoiseTexture);
+	Mesh->SetMaterial(0, MaterialInstance);
 
 	CreateTriangle();
 }
