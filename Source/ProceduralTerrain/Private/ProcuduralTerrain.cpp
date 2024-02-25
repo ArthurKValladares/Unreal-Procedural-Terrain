@@ -17,6 +17,9 @@ AProcuduralTerrain::AProcuduralTerrain()
 {
 	check(Mesh);
 	check(Material);
+
+	CreateTriangle();
+
 	RootComponent = Mesh;
 }
 
@@ -32,8 +35,6 @@ void AProcuduralTerrain::BeginPlay()
 	check(MaterialInstance);
 	MaterialInstance->SetTextureParameterValue("NoiseTexture", Noise.NoiseTexture);
 	Mesh->SetMaterial(0, MaterialInstance);
-
-	CreateTriangle();
 }
 
 // Called every frame
