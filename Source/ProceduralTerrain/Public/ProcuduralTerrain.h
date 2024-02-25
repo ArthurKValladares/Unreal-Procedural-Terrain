@@ -36,6 +36,8 @@ class PROCEDURALTERRAIN_API AProcuduralTerrain : public AActor
 	UPROPERTY(EditAnywhere)
 	float Lacunarity;
 
+	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent);
+
 public:	
 	// Sets default values for this actor's properties
 	AProcuduralTerrain();

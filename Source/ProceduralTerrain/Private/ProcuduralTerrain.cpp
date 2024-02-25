@@ -28,7 +28,7 @@ void AProcuduralTerrain::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Noise = NoiseMap(Width, Height, Scale, Octaves, Persistance, Lacunarity);
+	Noise.AllocateAndUpdate(Width, Height, Scale, Octaves, Persistance, Lacunarity);
 	check(Noise.NoiseTexture);
 
 	MaterialInstance = UMaterialInstanceDynamic::Create(Material, Mesh);
@@ -65,4 +65,18 @@ void AProcuduralTerrain::CreateTriangle() {
 	Uv0.Add(FVector2D(1., 1.));
 
 	Mesh->CreateMeshSection_LinearColor(0, Vertices, Triangles, {}, Uv0, {}, {}, false);
+}
+
+
+void AProcuduralTerrain::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) {
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+
+	if (Noise.NoiseTexture == nullptr) {
+		Noise.AllocateAndUpdate(Width, Height, Scale, Octaves, Persistance, Lacunarity);
+	}
+	else {
+		Noise.Update(Scale, Octaves, Persistance, Lacunarity);
+	}
+	
+	MaterialInstance->SetTextureParameterValue("NoiseTexture", Noise.NoiseTexture);
 }

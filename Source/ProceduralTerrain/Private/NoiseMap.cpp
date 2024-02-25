@@ -18,11 +18,17 @@ namespace {
 NoiseMap::NoiseMap() {
 }
 
-NoiseMap::NoiseMap(int Width, int Height, float Scale, int Octaves, float Persistance, float Lacunarity)
+void NoiseMap::AllocateAndUpdate(int W, int H, float Scale, int Octaves, float Persistance, float Lacunarity)
 {
+	Width = W;
+	Height = H;
 	NoiseValues.SetNum(Width * Height);
 	NoiseTexture = UTexture2D::CreateTransient(Width, Height, PF_B8G8R8A8, "NoiseTexture");
 
+	Update(Scale, Octaves, Persistance, Lacunarity);
+}
+
+void NoiseMap::Update(float Scale, int Octaves, float Persistance, float Lacunarity) {
 	FTexture2DMipMap* MipMap = &NoiseTexture->GetPlatformData()->Mips[0];
 	FByteBulkData* ImageData = &MipMap->BulkData;
 
@@ -72,7 +78,7 @@ NoiseMap::NoiseMap(int Width, int Height, float Scale, int Octaves, float Persis
 		}
 	}
 	ImageData->Unlock();
-	
+
 	NoiseTexture->UpdateResource();
 }
 

@@ -11,10 +11,14 @@ class PROCEDURALTERRAIN_API NoiseMap
 {
 public:
 	NoiseMap();
-	NoiseMap(int Width, int Height, float Scale, int Octaves, float Persistance, float Lacunarity);
 	~NoiseMap();
+
+	void AllocateAndUpdate(int Width, int Height, float Scale, int Octaves, float Persistance, float Lacunarity);
+	void Update(float Scale, int Octaves, float Persistance, float Lacunarity);
 
 	UPROPERTY()
 	TArray<float> NoiseValues;
 	UTexture2D* NoiseTexture;
+	int Width;
+	int Height;
 };
