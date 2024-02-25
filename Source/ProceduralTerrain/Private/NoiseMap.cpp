@@ -27,8 +27,8 @@ NoiseMap::NoiseMap(int Width, int Height, float Scale)
 		for (int C = 0; C < Width; ++C) {
 			const int PixelIndex = R * Stride + C * PixelSize;
 
-			const float SampleX = R / Scale;
-			const float SampleY = C / Scale;
+			const float SampleX = C / Scale;
+			const float SampleY = R / Scale;
 			const float Noise = Perlin2D(SampleX, SampleY);
 			const uint8 Color = static_cast<uint8>(Noise * 255.);
 
