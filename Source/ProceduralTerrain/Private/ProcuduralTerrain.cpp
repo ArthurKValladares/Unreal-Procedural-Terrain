@@ -8,6 +8,12 @@
 AProcuduralTerrain::AProcuduralTerrain()
 	: Mesh(CreateDefaultSubobject<UProceduralMeshComponent>("GeneratedMesh"))
 	, Material(CreateDefaultSubobject<UMaterial>("NoiseMaterial"))
+	, Width(500)
+	, Height(500)
+	, Scale(60.)
+	, Octaves(1)
+	, Persistance(0.5)
+	, Lacunarity(1.0)
 {
 	check(Mesh);
 	check(Material);
@@ -19,7 +25,7 @@ void AProcuduralTerrain::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Noise = NoiseMap(500, 500, 60., 1, 0.5, 1.0);
+	Noise = NoiseMap(Width, Height, Scale, Octaves, Persistance, Lacunarity);
 	check(Noise.NoiseTexture);
 
 	MaterialInstance = UMaterialInstanceDynamic::Create(Material, Mesh);

@@ -19,12 +19,22 @@ class PROCEDURALTERRAIN_API AProcuduralTerrain : public AActor
 
 	UPROPERTY(VisibleAnywhere)
 	UProceduralMeshComponent* Mesh;
+	UPROPERTY(VisibleAnywhere)
+	UMaterial* Material;
+	UMaterialInstanceDynamic* MaterialInstance;
 
 	UPROPERTY(EditAnywhere)
-	UMaterial* Material;
-
-	UPROPERTY(VisibleAnywhere)
-	UMaterialInstanceDynamic* MaterialInstance;
+	int Width;
+	UPROPERTY(EditAnywhere)
+	int Height;
+	UPROPERTY(EditAnywhere)
+	float Scale;
+	UPROPERTY(EditAnywhere)
+	int Octaves;
+	UPROPERTY(EditAnywhere)
+	float Persistance;
+	UPROPERTY(EditAnywhere)
+	float Lacunarity;
 
 public:	
 	// Sets default values for this actor's properties
