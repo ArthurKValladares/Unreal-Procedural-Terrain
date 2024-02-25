@@ -15,6 +15,7 @@ NoiseMap::NoiseMap() {
 
 NoiseMap::NoiseMap(int Width, int Height, float Scale)
 {
+	NoiseValues.SetNum(Width * Height);
 	NoiseTexture = UTexture2D::CreateTransient(Width, Height, PF_B8G8R8A8, "NoiseTexture");
 
 	FTexture2DMipMap* MipMap = &NoiseTexture->GetPlatformData()->Mips[0];
@@ -22,20 +23,22 @@ NoiseMap::NoiseMap(int Width, int Height, float Scale)
 
 	uint8* RawImageData = (uint8*)ImageData->Lock(LOCK_READ_WRITE);
 	const int PixelSize = 4;
-	const int Stride = Width * PixelSize;
+	const int Stride = Width;
 	for (int R = 0; R < Height; ++R) {
 		for (int C = 0; C < Width; ++C) {
-			const int PixelIndex = R * Stride + C * PixelSize;
+			const int NoiseIndex = R * Stride + C;
+			const int TextureIndex = NoiseIndex * PixelSize;
 
 			const float SampleX = C / Scale;
 			const float SampleY = R / Scale;
 			const float Noise = Perlin2D(SampleX, SampleY);
-			const uint8 Color = static_cast<uint8>(Noise * 255.);
+			NoiseValues[NoiseIndex] = Noise;
 
-			RawImageData[PixelIndex] = Color;
-			RawImageData[PixelIndex + 1] = Color;
-			RawImageData[PixelIndex + 2] = Color;
-			RawImageData[PixelIndex + 3] = 255;
+			const uint8 Color = Noise * 255.;
+			RawImageData[TextureIndex] = Color;
+			RawImageData[TextureIndex + 1] = Color;
+			RawImageData[TextureIndex + 2] = Color;
+			RawImageData[TextureIndex + 3] = 255;
 		}
 	}
 	ImageData->Unlock();

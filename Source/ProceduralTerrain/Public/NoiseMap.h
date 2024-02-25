@@ -15,5 +15,6 @@ public:
 	~NoiseMap();
 
 	UPROPERTY()
+	TArray<float> NoiseValues;
 	UTexture2D* NoiseTexture;
 };
