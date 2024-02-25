@@ -11,7 +11,7 @@ class PROCEDURALTERRAIN_API NoiseMap
 {
 public:
 	NoiseMap();
-	NoiseMap(int Width, int Height, float Scale);
+	NoiseMap(int Width, int Height, float Scale, int Octaves, float Persistance, float Lacunarity);
 	~NoiseMap();
 
 	UPROPERTY()

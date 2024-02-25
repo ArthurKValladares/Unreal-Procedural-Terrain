@@ -19,7 +19,7 @@ void AProcuduralTerrain::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Noise = NoiseMap(500, 500, 60.);
+	Noise = NoiseMap(500, 500, 60., 1, 0.5, 1.0);
 	check(Noise.NoiseTexture);
 
 	MaterialInstance = UMaterialInstanceDynamic::Create(Material, Mesh);
