@@ -23,10 +23,8 @@ AProcuduralTerrain::AProcuduralTerrain()
 	RootComponent = Mesh;
 }
 
-// Called when the game starts or when spawned
-void AProcuduralTerrain::BeginPlay()
-{
-	Super::BeginPlay();
+void AProcuduralTerrain::OnConstruction(const FTransform& Transform) {
+	Super::OnConstruction(Transform);
 
 	Noise.AllocateAndUpdate(Width, Height, Scale, Octaves, Persistance, Lacunarity);
 	check(Noise.NoiseTexture);
@@ -35,6 +33,12 @@ void AProcuduralTerrain::BeginPlay()
 	check(MaterialInstance);
 	MaterialInstance->SetTextureParameterValue("NoiseTexture", Noise.NoiseTexture);
 	Mesh->SetMaterial(0, MaterialInstance);
+}
+
+// Called when the game starts or when spawned
+void AProcuduralTerrain::BeginPlay()
+{
+	Super::BeginPlay();
 }
 
 // Called every frame
@@ -71,12 +75,7 @@ void AProcuduralTerrain::CreateTriangle() {
 void AProcuduralTerrain::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
-	if (Noise.NoiseTexture == nullptr) {
-		Noise.AllocateAndUpdate(Width, Height, Scale, Octaves, Persistance, Lacunarity);
-	}
-	else {
-		Noise.Update(Scale, Octaves, Persistance, Lacunarity);
-	}
+	Noise.Update(Scale, Octaves, Persistance, Lacunarity);
 	
 	MaterialInstance->SetTextureParameterValue("NoiseTexture", Noise.NoiseTexture);
 }
