@@ -8,12 +8,14 @@
 AProcuduralTerrain::AProcuduralTerrain()
 	: Mesh(CreateDefaultSubobject<UProceduralMeshComponent>("GeneratedMesh"))
 	, Material(CreateDefaultSubobject<UMaterial>("NoiseMaterial"))
+	, RandomSeed(1)
 	, Width(500)
 	, Height(500)
 	, Scale(60.)
 	, Octaves(1)
 	, Persistance(0.5)
 	, Lacunarity(1.0)
+	, NoiseOffset(FVector2D(0., 0.))
 {
 	check(Mesh);
 	check(Material);
@@ -26,7 +28,7 @@ AProcuduralTerrain::AProcuduralTerrain()
 void AProcuduralTerrain::OnConstruction(const FTransform& Transform) {
 	Super::OnConstruction(Transform);
 
-	Noise.AllocateAndUpdate(Width, Height, Scale, Octaves, Persistance, Lacunarity);
+	Noise.AllocateAndUpdate(RandomSeed, Width, Height, Scale, Octaves, Persistance, Lacunarity, NoiseOffset);
 	check(Noise.NoiseTexture);
 
 	MaterialInstance = UMaterialInstanceDynamic::Create(Material, Mesh);
@@ -75,7 +77,7 @@ void AProcuduralTerrain::CreateTriangle() {
 void AProcuduralTerrain::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
-	Noise.Update(Scale, Octaves, Persistance, Lacunarity);
+	Noise.Update(Scale, Octaves, Persistance, Lacunarity, NoiseOffset);
 	
 	MaterialInstance->SetTextureParameterValue("NoiseTexture", Noise.NoiseTexture);
 }

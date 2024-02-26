@@ -24,6 +24,8 @@ class PROCEDURALTERRAIN_API AProcuduralTerrain : public AActor
 	UMaterialInstanceDynamic* MaterialInstance;
 
 	UPROPERTY(EditAnywhere)
+	int RandomSeed;
+	UPROPERTY(EditAnywhere)
 	int Width;
 	UPROPERTY(EditAnywhere)
 	int Height;
@@ -35,6 +37,8 @@ class PROCEDURALTERRAIN_API AProcuduralTerrain : public AActor
 	float Persistance;
 	UPROPERTY(EditAnywhere)
 	float Lacunarity;
+	UPROPERTY(EditAnywhere)
+	FVector2D NoiseOffset;
 
 	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent);
 
