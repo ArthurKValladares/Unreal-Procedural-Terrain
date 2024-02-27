@@ -11,7 +11,10 @@
 UENUM()
 enum class ETerrainType : uint8 {
 	Water,
-	Land,
+	Sand,
+	Grass,
+	Mountain,
+	Snow,
 	Count
 };
 
@@ -21,16 +24,31 @@ struct FTerrainParams {
 
 	static TArray<FTerrainParams> GetParams() {
 		TArray<FTerrainParams> Params;
-		Params.SetNum(2);
+		Params.SetNum(static_cast<int>(ETerrainType::Count));
 		Params[0] = FTerrainParams{
 			ETerrainType::Water, 
 			0.4, 
 			FColor(0, 0, 255)
 		};
-		Params[1] = FTerrainParams{ 
-			ETerrainType::Land, 
-			1.0, 
+		Params[1] = FTerrainParams{
+			ETerrainType::Sand,
+			0.5,
+			FColor(255, 255, 0)
+		};
+		Params[2] = FTerrainParams{ 
+			ETerrainType::Grass, 
+			0.6, 
 			FColor(0, 255, 0)
+		};
+		Params[3] = FTerrainParams{
+			ETerrainType::Mountain,
+			0.9,
+			FColor(69, 50, 0)
+		};
+		Params[4] = FTerrainParams{
+			ETerrainType::Snow,
+			1.0,
+			FColor(255, 255, 255)
 		};
 		// TODO: Assert some params stuff later, like height is always increasing. On change too
 		return Params;

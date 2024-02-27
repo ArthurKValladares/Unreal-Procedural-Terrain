@@ -22,7 +22,6 @@ AProcuduralTerrain::AProcuduralTerrain()
 	, Persistance(0.5)
 	, Lacunarity(1.0)
 	, NoiseOffset(FVector2D(0., 0.))
-	, DisplayTexture(EDisplayTexture::Color)
 	, TerrainParams(FTerrainParams::GetParams())
 {
 	check(Mesh);
@@ -35,6 +34,7 @@ AProcuduralTerrain::AProcuduralTerrain()
 
 void AProcuduralTerrain::OnConstruction(const FTransform& Transform) {
 	Super::OnConstruction(Transform);
+	DisplayTexture = EDisplayTexture::Color;
 
 	NoiseTexture = UTexture2D::CreateTransient(Width, Height, PF_B8G8R8A8, "NoiseTexture");
 	check(NoiseTexture);
@@ -90,6 +90,7 @@ void AProcuduralTerrain::CreateTriangle() {
 void AProcuduralTerrain::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
+	// TODO: I'm doing too much on update here, be smarter later
 	UpdateNoise();
 	SetDisplayTexture();
 }
