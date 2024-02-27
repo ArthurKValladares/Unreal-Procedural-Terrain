@@ -8,30 +8,38 @@
 #include "ProceduralMeshComponent.h"
 #include "ProcuduralTerrain.generated.h"
 
+UENUM()
 enum class ETerrainType : uint8 {
 	Water,
 	Land,
 	Count
 };
 
+USTRUCT()
 struct FTerrainParams {
+	GENERATED_BODY()
+
 	static TArray<FTerrainParams> GetParams() {
 		TArray<FTerrainParams> Params;
 		Params.SetNum(2);
-		Params.Add(FTerrainParams{
+		Params[0] = FTerrainParams{
 			ETerrainType::Water, 
 			0.4, 
 			FColor(20, 203, 205) 
-		});
-		Params.Add(FTerrainParams{ 
-			ETerrainType::Water, 
-			0.4, 
-			FColor(20, 203, 205) 
-		});
+		};
+		Params[1] = FTerrainParams{ 
+			ETerrainType::Land, 
+			1.0, 
+			FColor(59, 150, 56)
+		};
+		return Params;
 	}
 
+	UPROPERTY(VisibleAnywhere)
 	ETerrainType Type;
+	UPROPERTY(EditAnywhere)
 	float MaxHeight;
+	UPROPERTY(EditAnywhere)
 	FColor Color;
 };
 
@@ -66,6 +74,9 @@ class PROCEDURALTERRAIN_API AProcuduralTerrain : public AActor
 	float Lacunarity;
 	UPROPERTY(EditAnywhere)
 	FVector2D NoiseOffset;
+
+	UPROPERTY(EditAnywhere)
+	TArray<FTerrainParams> TerrainParams;
 
 	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent);
 

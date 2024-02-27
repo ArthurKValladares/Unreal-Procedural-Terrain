@@ -16,6 +16,7 @@ AProcuduralTerrain::AProcuduralTerrain()
 	, Persistance(0.5)
 	, Lacunarity(1.0)
 	, NoiseOffset(FVector2D(0., 0.))
+	, TerrainParams(FTerrainParams::GetParams())
 {
 	check(Mesh);
 	check(Material);
