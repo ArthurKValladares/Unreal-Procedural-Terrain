@@ -25,13 +25,14 @@ struct FTerrainParams {
 		Params[0] = FTerrainParams{
 			ETerrainType::Water, 
 			0.4, 
-			FColor(20, 203, 205) 
+			FColor(0, 0, 255)
 		};
 		Params[1] = FTerrainParams{ 
 			ETerrainType::Land, 
 			1.0, 
-			FColor(59, 150, 56)
+			FColor(0, 255, 0)
 		};
+		// TODO: Assert some params stuff later, like height is always increasing. On change too
 		return Params;
 	}
 
@@ -41,6 +42,12 @@ struct FTerrainParams {
 	float MaxHeight;
 	UPROPERTY(EditAnywhere)
 	FColor Color;
+};
+
+UENUM()
+enum class EDisplayTexture : uint8 {
+	Noise,
+	Color
 };
 
 UCLASS()
@@ -76,21 +83,25 @@ class PROCEDURALTERRAIN_API AProcuduralTerrain : public AActor
 	FVector2D NoiseOffset;
 
 	UPROPERTY(EditAnywhere)
+	EDisplayTexture DisplayTexture;
+
+	UPROPERTY(EditAnywhere)
 	TArray<FTerrainParams> TerrainParams;
+
+	UTexture2D* NoiseTexture;
+	UTexture2D* ColorTexture;
 
 	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent);
 
+	void SetDisplayTexture();
+	void UpdateNoise();
 public:	
-	// Sets default values for this actor's properties
 	AProcuduralTerrain();
 
 protected:
 	virtual void OnConstruction(const FTransform& Transform) override;
-
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 };
