@@ -8,6 +8,33 @@
 #include "ProceduralMeshComponent.h"
 #include "ProcuduralTerrain.generated.h"
 
+enum class ETerrainType : uint8 {
+	Water,
+	Land,
+	Count
+};
+
+struct FTerrainParams {
+	static TArray<FTerrainParams> GetParams() {
+		TArray<FTerrainParams> Params;
+		Params.SetNum(2);
+		Params.Add(FTerrainParams{
+			ETerrainType::Water, 
+			0.4, 
+			FColor(20, 203, 205) 
+		});
+		Params.Add(FTerrainParams{ 
+			ETerrainType::Water, 
+			0.4, 
+			FColor(20, 203, 205) 
+		});
+	}
+
+	ETerrainType Type;
+	float MaxHeight;
+	FColor Color;
+};
+
 UCLASS()
 class PROCEDURALTERRAIN_API AProcuduralTerrain : public AActor
 {
