@@ -14,8 +14,8 @@ namespace {
 AProcuduralTerrain::AProcuduralTerrain()
 	: Mesh(CreateDefaultSubobject<UProceduralMeshComponent>("GeneratedMesh"))
 	, Material(CreateDefaultSubobject<UMaterial>("NoiseMaterial"))
-	, Width(75)
-	, Height(75)
+	, Width(200)
+	, Height(200)
 	, TileSize(5.)
 	, ElevationMultiplier( (Height * TileSize) / 3.)
 	, ElevationCurve(CreateDefaultSubobject<UCurveFloat>("ElevationCurve"))
@@ -31,15 +31,13 @@ AProcuduralTerrain::AProcuduralTerrain()
 	check(Mesh);
 	check(Material);
 
-	Noise.Init(RandomSeed, Width, Height);
-	Noise.Update(Scale, Octaves, Persistance, Lacunarity, NoiseOffset);
-	CreateMesh();
-
 	RootComponent = Mesh;
 }
 
 void AProcuduralTerrain::OnConstruction(const FTransform& Transform) {
 	Super::OnConstruction(Transform);
+
+	Noise.Init(RandomSeed, Width, Height, Scale, Octaves, Persistance, Lacunarity, NoiseOffset);
 
 	Texture = UTexture2D::CreateTransient(Width, Height, PF_B8G8R8A8, "Texture");
 	Texture->Filter = TextureFilter::TF_Nearest;
@@ -52,6 +50,8 @@ void AProcuduralTerrain::OnConstruction(const FTransform& Transform) {
 	check(MaterialInstance);
 	MaterialInstance->SetTextureParameterValue("NoiseTexture", Texture);
 	Mesh->SetMaterial(0, MaterialInstance);
+
+	CreateMesh();
 }
 
 // Called when the game starts or when spawned
@@ -170,4 +170,8 @@ void AProcuduralTerrain::UpdateTexture() {
 	}
 	ImageData->Unlock();
 	Texture->UpdateResource();
+}
+
+void AProcuduralTerrain::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) {
+	Super::PostEditChangeProperty(PropertyChangedEvent);
 }

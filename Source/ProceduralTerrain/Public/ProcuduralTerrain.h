@@ -113,6 +113,8 @@ class PROCEDURALTERRAIN_API AProcuduralTerrain : public AActor
 
 	UTexture2D* Texture;
 
+	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent);
+
 	void CreateMesh();
 	void UpdateTexture();
 public:	

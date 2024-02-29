@@ -13,19 +13,17 @@ namespace {
 NoiseMap::NoiseMap() {
 }
 
-void NoiseMap::Init(int Seed, int W, int H)
+void NoiseMap::Init(int Seed, int W, int H, float Scale, int Octaves, float Persistance, float Lacunarity, FVector2D NoiseOffset)
 {
 	RandomStream = FRandomStream(Seed);
 
 	Width = W;
 	Height = H;
 	NoiseValues.SetNum(Width * Height);
-}
 
-void NoiseMap::Update(float Scale, int Octaves, float Persistance, float Lacunarity, FVector2D NoiseOffset) {
 	TArray<FVector2D> OctaveOffsets;
 	OctaveOffsets.SetNum(Octaves);
-	for (int I = 0; I < Octaves;  ++I) {
+	for (int I = 0; I < Octaves; ++I) {
 		const float X = RandomStream.FRandRange(-100000, 100000);
 		const float Y = RandomStream.FRandRange(-100000, 100000);
 		OctaveOffsets[I] = FVector2D(X, Y);

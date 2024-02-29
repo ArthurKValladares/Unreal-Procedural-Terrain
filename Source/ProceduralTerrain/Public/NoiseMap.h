@@ -11,8 +11,7 @@ public:
 	NoiseMap();
 	~NoiseMap();
 
-	void Init(int Seed, int Width, int Height);
-	void Update(float Scale, int Octaves, float Persistance, float Lacunarity, FVector2D NoiseOffset);
+	void Init(int Seed, int Width, int Height, float Scale, int Octaves, float Persistance, float Lacunarity, FVector2D NoiseOffset);
 
 	FRandomStream RandomStream;
 
