@@ -84,11 +84,14 @@ class PROCEDURALTERRAIN_API AProcuduralTerrain : public AActor
 	UMaterialInstanceDynamic* MaterialInstance;
 
 	UPROPERTY(EditAnywhere)
-	int RandomSeed;
-	UPROPERTY(EditAnywhere)
 	int Width;
 	UPROPERTY(EditAnywhere)
 	int Height;
+	UPROPERTY(EditAnywhere)
+	float TileSize;
+
+	UPROPERTY(EditAnywhere)
+	int RandomSeed;
 	UPROPERTY(EditAnywhere)
 	float Scale;
 	UPROPERTY(EditAnywhere)

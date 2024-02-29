@@ -14,9 +14,10 @@ namespace {
 AProcuduralTerrain::AProcuduralTerrain()
 	: Mesh(CreateDefaultSubobject<UProceduralMeshComponent>("GeneratedMesh"))
 	, Material(CreateDefaultSubobject<UMaterial>("NoiseMaterial"))
+	, Width(100)
+	, Height(100)
+	, TileSize(1.)
 	, RandomSeed(1)
-	, Width(500)
-	, Height(500)
 	, Scale(60.)
 	, Octaves(1)
 	, Persistance(0.5)
@@ -63,26 +64,51 @@ void AProcuduralTerrain::Tick(float DeltaTime)
 }
 
 void AProcuduralTerrain::CreateTriangle() {
+	const int NumVertices = Width * Height;
+	const int NumIndices = (Width - 1) * (Height - 1) * 6;
+
+	const float ZOffset = 10.0;
+
 	TArray<FVector> Vertices;
-	Vertices.Add(FVector(0, 0, 0));
-	Vertices.Add(FVector(0, 100, 0));
-	Vertices.Add(FVector(0, 0, 100));
-	Vertices.Add(FVector(0, 100, 100));
-
-	TArray<int32> Triangles;
-	Triangles.Add(0);
-	Triangles.Add(1);
-	Triangles.Add(2);
-	Triangles.Add(2);
-	Triangles.Add(1);
-	Triangles.Add(3);
-
 	TArray<FVector2D> Uv0;
-	Uv0.Add(FVector2D(0., 0.));
-	Uv0.Add(FVector2D(1., 0.));
-	Uv0.Add(FVector2D(0., 1.));
-	Uv0.Add(FVector2D(1., 1.));
+	TArray<int32> Triangles;
+	for (int Y = 0; Y < Height; ++Y) {
+		const float IndexOffset = Y * Width;
+		for (int X = 0; X < Width; ++X) {
+			const float XPos = X * TileSize;
+			const float YPos = Y * TileSize;
+			Vertices.Add(FVector(XPos, YPos, ZOffset));
 
+			const float U = (float)X / Width;
+			const float V = (float)Y / Width;
+			Uv0.Add(FVector2D(U, V));
+
+			if (Y < Height - 1 && X < Width - 1) {
+				// Vertex setup
+				//   0      1      2      3    ..    W-1
+				// (0+W)  (1+W)  (2+W)  (3+W)  .. (2W - 1)
+				// ...
+				
+				// Both triangles need to have counter-clockwise winding-order
+				//     X
+				//     |\
+				//     | \
+				// X+W --- x+W+1
+				Triangles.Add(IndexOffset + X);
+				Triangles.Add(IndexOffset + X + Width);
+				Triangles.Add(IndexOffset + X + Width + 1);
+
+				// X --- X+1    
+				//   \ |
+				//    \|
+				//     X+1+W
+				Triangles.Add(IndexOffset + X);
+				Triangles.Add(IndexOffset + X + 1 + Width);
+				Triangles.Add(IndexOffset + X + 1);
+			}
+		}
+	}
+	
 	Mesh->CreateMeshSection_LinearColor(0, Vertices, Triangles, {}, Uv0, {}, {}, false);
 }
 
