@@ -14,9 +14,9 @@ namespace {
 AProcuduralTerrain::AProcuduralTerrain()
 	: Mesh(CreateDefaultSubobject<UProceduralMeshComponent>("GeneratedMesh"))
 	, Material(CreateDefaultSubobject<UMaterial>("NoiseMaterial"))
-	, Width(100)
-	, Height(100)
-	, TileSize(1.)
+	, Width(25)
+	, Height(25)
+	, TileSize(5.)
 	, RandomSeed(1)
 	, Scale(60.)
 	, Octaves(1)
@@ -38,8 +38,14 @@ void AProcuduralTerrain::OnConstruction(const FTransform& Transform) {
 	DisplayTexture = EDisplayTexture::Color;
 
 	NoiseTexture = UTexture2D::CreateTransient(Width, Height, PF_B8G8R8A8, "NoiseTexture");
+	NoiseTexture->Filter = TextureFilter::TF_Nearest;
+	NoiseTexture->AddressX = TextureAddress::TA_Clamp;
+	NoiseTexture->AddressY = TextureAddress::TA_Clamp;
 	check(NoiseTexture);
 	ColorTexture = UTexture2D::CreateTransient(Width, Height, PF_B8G8R8A8, "ColorTexture");
+	ColorTexture->Filter = TextureFilter::TF_Nearest;
+	ColorTexture->AddressX = TextureAddress::TA_Clamp;
+	ColorTexture->AddressY = TextureAddress::TA_Clamp;
 	check(ColorTexture);
 
 	Noise.Init(RandomSeed, Width, Height);
@@ -67,6 +73,11 @@ void AProcuduralTerrain::CreateTriangle() {
 	const int NumVertices = Width * Height;
 	const int NumIndices = (Width - 1) * (Height - 1) * 6;
 
+	const float TotalWidth = Width * TileSize;
+	const float TotalHeight = Height * TileSize;
+
+	const float XOffset = -TotalWidth / 2.;
+	const float YOffset = -TotalHeight / 2.;
 	const float ZOffset = 10.0;
 
 	TArray<FVector> Vertices;
@@ -77,7 +88,7 @@ void AProcuduralTerrain::CreateTriangle() {
 		for (int X = 0; X < Width; ++X) {
 			const float XPos = X * TileSize;
 			const float YPos = Y * TileSize;
-			Vertices.Add(FVector(XPos, YPos, ZOffset));
+			Vertices.Add(FVector(XPos + XOffset, YPos + YOffset, ZOffset));
 
 			const float U = (float)X / Width;
 			const float V = (float)Y / Width;

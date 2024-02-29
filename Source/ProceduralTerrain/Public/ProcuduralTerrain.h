@@ -42,7 +42,7 @@ struct FTerrainParams {
 		};
 		Params[3] = FTerrainParams{
 			ETerrainType::Mountain,
-			0.9,
+			0.95,
 			FColor(69, 50, 0)
 		};
 		Params[4] = FTerrainParams{
