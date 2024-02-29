@@ -14,8 +14,8 @@ namespace {
 AProcuduralTerrain::AProcuduralTerrain()
 	: Mesh(CreateDefaultSubobject<UProceduralMeshComponent>("GeneratedMesh"))
 	, Material(CreateDefaultSubobject<UMaterial>("NoiseMaterial"))
-	, Width(25)
-	, Height(25)
+	, Width(75)
+	, Height(75)
 	, TileSize(5.)
 	, RandomSeed(1)
 	, Scale(60.)
@@ -23,6 +23,7 @@ AProcuduralTerrain::AProcuduralTerrain()
 	, Persistance(0.5)
 	, Lacunarity(1.0)
 	, NoiseOffset(FVector2D(0., 0.))
+	, DisplayTexture(EDisplayTexture::Color)
 	, TerrainParams(FTerrainParams::GetParams())
 {
 	check(Mesh);
@@ -35,25 +36,19 @@ AProcuduralTerrain::AProcuduralTerrain()
 
 void AProcuduralTerrain::OnConstruction(const FTransform& Transform) {
 	Super::OnConstruction(Transform);
-	DisplayTexture = EDisplayTexture::Color;
 
-	NoiseTexture = UTexture2D::CreateTransient(Width, Height, PF_B8G8R8A8, "NoiseTexture");
-	NoiseTexture->Filter = TextureFilter::TF_Nearest;
-	NoiseTexture->AddressX = TextureAddress::TA_Clamp;
-	NoiseTexture->AddressY = TextureAddress::TA_Clamp;
-	check(NoiseTexture);
-	ColorTexture = UTexture2D::CreateTransient(Width, Height, PF_B8G8R8A8, "ColorTexture");
-	ColorTexture->Filter = TextureFilter::TF_Nearest;
-	ColorTexture->AddressX = TextureAddress::TA_Clamp;
-	ColorTexture->AddressY = TextureAddress::TA_Clamp;
-	check(ColorTexture);
+	Texture = UTexture2D::CreateTransient(Width, Height, PF_B8G8R8A8, "Texture");
+	Texture->Filter = TextureFilter::TF_Nearest;
+	Texture->AddressX = TextureAddress::TA_Clamp;
+	Texture->AddressY = TextureAddress::TA_Clamp;
+	check(Texture);
 
 	Noise.Init(RandomSeed, Width, Height);
 	UpdateNoise();
 
 	MaterialInstance = UMaterialInstanceDynamic::Create(Material, Mesh);
 	check(MaterialInstance);
-	SetDisplayTexture();
+	MaterialInstance->SetTextureParameterValue("NoiseTexture", Texture);
 	Mesh->SetMaterial(0, MaterialInstance);
 }
 
@@ -123,40 +118,12 @@ void AProcuduralTerrain::CreateTriangle() {
 	Mesh->CreateMeshSection_LinearColor(0, Vertices, Triangles, {}, Uv0, {}, {}, false);
 }
 
-
-void AProcuduralTerrain::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) {
-	Super::PostEditChangeProperty(PropertyChangedEvent);
-
-	// TODO: I'm doing too much on update here, be smarter later
-	UpdateNoise();
-	SetDisplayTexture();
-}
-
-void AProcuduralTerrain::SetDisplayTexture() {
-	switch (DisplayTexture)
-	{
-		case EDisplayTexture::Noise: {
-			MaterialInstance->SetTextureParameterValue("NoiseTexture", NoiseTexture);
-			break;
-		}
-		case EDisplayTexture::Color: {
-			MaterialInstance->SetTextureParameterValue("NoiseTexture", ColorTexture);
-			break;
-		}
-	}
-}
-
 void AProcuduralTerrain::UpdateNoise() {
 	Noise.Update(Scale, Octaves, Persistance, Lacunarity, NoiseOffset);
 
-	FTexture2DMipMap* NoiseMipMap = &NoiseTexture->GetPlatformData()->Mips[0];
-	FByteBulkData* NoiseImageData = &NoiseMipMap->BulkData;
-	uint8* RawNoiseImageData = (uint8*)NoiseImageData->Lock(LOCK_READ_WRITE);
-
-	FTexture2DMipMap* ColorMipMap = &ColorTexture->GetPlatformData()->Mips[0];
-	FByteBulkData* ColorImageData = &ColorMipMap->BulkData;
-	uint8* RawColorImageData = (uint8*)ColorImageData->Lock(LOCK_READ_WRITE);
-
+	FTexture2DMipMap* MipMap = &Texture->GetPlatformData()->Mips[0];
+	FByteBulkData* ImageData = &MipMap->BulkData;
+	uint8* RawImageData = (uint8*)ImageData->Lock(LOCK_READ_WRITE);
 	const int PixelSize = 4;
 	for (int R = 0; R < Height; ++R) {
 		for (int C = 0; C < Width; ++C) {
@@ -166,29 +133,33 @@ void AProcuduralTerrain::UpdateNoise() {
 			const float NoiseValue = Noise.NoiseValues[NoiseIndex];
 			const float NormalizedNoise = InverseLerp(Noise.MinNoise, Noise.MaxNoise, NoiseValue);
 
-			const uint8 NoiseTexColor = NormalizedNoise * 255.;
-			RawNoiseImageData[TextureIndex] = NoiseTexColor;
-			RawNoiseImageData[TextureIndex + 1] = NoiseTexColor;
-			RawNoiseImageData[TextureIndex + 2] = NoiseTexColor;
-			RawNoiseImageData[TextureIndex + 3] = 255;
+			switch (DisplayTexture)
+			{
+				case EDisplayTexture::Noise: {
+					const uint8 NoiseTexColor = NormalizedNoise * 255.;
+					RawImageData[TextureIndex] = NoiseTexColor;
+					RawImageData[TextureIndex + 1] = NoiseTexColor;
+					RawImageData[TextureIndex + 2] = NoiseTexColor;
+					RawImageData[TextureIndex + 3] = 255;
+					break;
+				}
+				case EDisplayTexture::Color: {
+					for (const FTerrainParams& Param : TerrainParams) {
+						if (NormalizedNoise <= Param.MaxHeight) {
+							const FColor Color = Param.Color;
 
-			for (const FTerrainParams& Param : TerrainParams) {
-				if (NormalizedNoise <= Param.MaxHeight) {
-					const FColor Color = Param.Color;
-
-					RawColorImageData[TextureIndex]     = Color.B;
-					RawColorImageData[TextureIndex + 1] = Color.G;
-					RawColorImageData[TextureIndex + 2] = Color.R;
-					RawColorImageData[TextureIndex + 3] = 255;
+							RawImageData[TextureIndex] = Color.B;
+							RawImageData[TextureIndex + 1] = Color.G;
+							RawImageData[TextureIndex + 2] = Color.R;
+							RawImageData[TextureIndex + 3] = 255;
+							break;
+						}
+					}
 					break;
 				}
 			}
 		}
 	}
-
-	NoiseImageData->Unlock();
-	ColorImageData->Unlock();
-
-	NoiseTexture->UpdateResource();
-	ColorTexture->UpdateResource();
+	ImageData->Unlock();
+	Texture->UpdateResource();
 }

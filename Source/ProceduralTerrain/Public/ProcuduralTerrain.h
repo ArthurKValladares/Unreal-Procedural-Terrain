@@ -109,10 +109,7 @@ class PROCEDURALTERRAIN_API AProcuduralTerrain : public AActor
 	UPROPERTY(EditAnywhere)
 	TArray<FTerrainParams> TerrainParams;
 
-	UTexture2D* NoiseTexture;
-	UTexture2D* ColorTexture;
-
-	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent);
+	UTexture2D* Texture;
 
 	void SetDisplayTexture();
 	void UpdateNoise();
