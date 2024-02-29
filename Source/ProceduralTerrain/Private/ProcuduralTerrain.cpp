@@ -17,6 +17,8 @@ AProcuduralTerrain::AProcuduralTerrain()
 	, Width(75)
 	, Height(75)
 	, TileSize(5.)
+	, ElevationMultiplier( (Height * TileSize) / 3.)
+	, ElevationCurve(CreateDefaultSubobject<UCurveFloat>("ElevationCurve"))
 	, RandomSeed(1)
 	, Scale(60.)
 	, Octaves(1)
@@ -29,7 +31,9 @@ AProcuduralTerrain::AProcuduralTerrain()
 	check(Mesh);
 	check(Material);
 
-	CreateTriangle();
+	Noise.Init(RandomSeed, Width, Height);
+	Noise.Update(Scale, Octaves, Persistance, Lacunarity, NoiseOffset);
+	CreateMesh();
 
 	RootComponent = Mesh;
 }
@@ -42,9 +46,7 @@ void AProcuduralTerrain::OnConstruction(const FTransform& Transform) {
 	Texture->AddressX = TextureAddress::TA_Clamp;
 	Texture->AddressY = TextureAddress::TA_Clamp;
 	check(Texture);
-
-	Noise.Init(RandomSeed, Width, Height);
-	UpdateNoise();
+	UpdateTexture();
 
 	MaterialInstance = UMaterialInstanceDynamic::Create(Material, Mesh);
 	check(MaterialInstance);
@@ -64,7 +66,7 @@ void AProcuduralTerrain::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void AProcuduralTerrain::CreateTriangle() {
+void AProcuduralTerrain::CreateMesh() {
 	const int NumVertices = Width * Height;
 	const int NumIndices = (Width - 1) * (Height - 1) * 6;
 
@@ -81,9 +83,18 @@ void AProcuduralTerrain::CreateTriangle() {
 	for (int Y = 0; Y < Height; ++Y) {
 		const float IndexOffset = Y * Width;
 		for (int X = 0; X < Width; ++X) {
+			// TODO: Duplicated code here, think about it soon, maybe save normalized noise instead of absolute
+			const int NoiseIndex = Y * Width + X;
+			const float NoiseValue = Noise.NoiseValues[NoiseIndex];
+			const float NormalizedNoise = InverseLerp(Noise.MinNoise, Noise.MaxNoise, NoiseValue);
+
 			const float XPos = X * TileSize;
 			const float YPos = Y * TileSize;
-			Vertices.Add(FVector(XPos + XOffset, YPos + YOffset, ZOffset));
+			float MultiplierEffectiveness = 1.0;
+			if (IsValid(ElevationCurve)) {
+				MultiplierEffectiveness = ElevationCurve->GetFloatValue(NormalizedNoise);
+			}
+			Vertices.Add(FVector(XPos + XOffset, YPos + YOffset, ZOffset + MultiplierEffectiveness * ElevationMultiplier));
 
 			const float U = (float)X / Width;
 			const float V = (float)Y / Width;
@@ -118,21 +129,18 @@ void AProcuduralTerrain::CreateTriangle() {
 	Mesh->CreateMeshSection_LinearColor(0, Vertices, Triangles, {}, Uv0, {}, {}, false);
 }
 
-void AProcuduralTerrain::UpdateNoise() {
-	Noise.Update(Scale, Octaves, Persistance, Lacunarity, NoiseOffset);
-
+void AProcuduralTerrain::UpdateTexture() {
 	FTexture2DMipMap* MipMap = &Texture->GetPlatformData()->Mips[0];
 	FByteBulkData* ImageData = &MipMap->BulkData;
 	uint8* RawImageData = (uint8*)ImageData->Lock(LOCK_READ_WRITE);
 	const int PixelSize = 4;
-	for (int R = 0; R < Height; ++R) {
-		for (int C = 0; C < Width; ++C) {
-			const int NoiseIndex = R * Width + C;
-			const int TextureIndex = NoiseIndex * PixelSize;
-
+	for (int Y = 0; Y < Height; ++Y) {
+		for (int X = 0; X < Width; ++X) {
+			const int NoiseIndex = Y * Width + X;
 			const float NoiseValue = Noise.NoiseValues[NoiseIndex];
 			const float NormalizedNoise = InverseLerp(Noise.MinNoise, Noise.MaxNoise, NoiseValue);
 
+			const int TextureIndex = NoiseIndex * PixelSize;
 			switch (DisplayTexture)
 			{
 				case EDisplayTexture::Noise: {

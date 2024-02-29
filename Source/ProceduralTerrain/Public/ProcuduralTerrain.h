@@ -73,8 +73,6 @@ class PROCEDURALTERRAIN_API AProcuduralTerrain : public AActor
 {
 	GENERATED_BODY()
 	
-	void CreateTriangle();
-
 	NoiseMap Noise;
 
 	UPROPERTY(VisibleAnywhere)
@@ -89,6 +87,10 @@ class PROCEDURALTERRAIN_API AProcuduralTerrain : public AActor
 	int Height;
 	UPROPERTY(EditAnywhere)
 	float TileSize;
+	UPROPERTY(EditAnywhere)
+	float ElevationMultiplier;
+	UPROPERTY(EditAnywhere)
+	UCurveFloat* ElevationCurve;
 
 	UPROPERTY(EditAnywhere)
 	int RandomSeed;
@@ -111,8 +113,8 @@ class PROCEDURALTERRAIN_API AProcuduralTerrain : public AActor
 
 	UTexture2D* Texture;
 
-	void SetDisplayTexture();
-	void UpdateNoise();
+	void CreateMesh();
+	void UpdateTexture();
 public:	
 	AProcuduralTerrain();
 
