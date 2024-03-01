@@ -14,10 +14,9 @@ namespace {
 AProcuduralTerrain::AProcuduralTerrain()
 	: Mesh(CreateDefaultSubobject<UProceduralMeshComponent>("GeneratedMesh"))
 	, Material(CreateDefaultSubobject<UMaterial>("NoiseMaterial"))
-	, Width(200)
-	, Height(200)
+	, MapLod(EMapLod::One)
 	, TileSize(5.)
-	, ElevationMultiplier( (Height * TileSize) / 3.)
+	, ElevationMultiplier( (AProcuduralTerrain::ChunkSize * TileSize) / 3.)
 	, ElevationCurve(CreateDefaultSubobject<UCurveFloat>("ElevationCurve"))
 	, RandomSeed(1)
 	, Scale(60.)
@@ -36,6 +35,10 @@ AProcuduralTerrain::AProcuduralTerrain()
 
 void AProcuduralTerrain::OnConstruction(const FTransform& Transform) {
 	Super::OnConstruction(Transform);
+
+	const int Width = AProcuduralTerrain::ChunkSize;
+	const int Height = AProcuduralTerrain::ChunkSize;
+	check((Width - 1) % static_cast<int>(MapLod) == 0);
 
 	Noise.Init(RandomSeed, Width, Height, Scale, Octaves, Persistance, Lacunarity, NoiseOffset);
 
@@ -67,8 +70,12 @@ void AProcuduralTerrain::Tick(float DeltaTime)
 }
 
 void AProcuduralTerrain::CreateMesh() {
-	const int NumVertices = Width * Height;
-	const int NumIndices = (Width - 1) * (Height - 1) * 6;
+	const int StepSize = static_cast<int>(MapLod);
+	const int Width = AProcuduralTerrain::ChunkSize;
+	const int Height = AProcuduralTerrain::ChunkSize;
+
+	const int VerticesPerRow = (Width - 1) / StepSize + 1;
+	const int NumIndices = (VerticesPerRow - 1) * (VerticesPerRow - 1) * 6;
 
 	const float TotalWidth = Width * TileSize;
 	const float TotalHeight = Height * TileSize;
@@ -80,9 +87,12 @@ void AProcuduralTerrain::CreateMesh() {
 	TArray<FVector> Vertices;
 	TArray<FVector2D> Uv0;
 	TArray<int32> Triangles;
-	for (int Y = 0; Y < Height; ++Y) {
-		const float IndexOffset = Y * Width;
-		for (int X = 0; X < Width; ++X) {
+	for (int Y = 0; Y < Height; Y += StepSize) {
+		const int YSteps = Y / StepSize;
+		const int YIndexOffset = YSteps * VerticesPerRow;
+		for (int X = 0; X < Width; X += StepSize) {
+			const int XSteps = X / StepSize;
+
 			// TODO: Duplicated code here, think about it soon, maybe save normalized noise instead of absolute
 			const int NoiseIndex = Y * Width + X;
 			const float NoiseValue = Noise.NoiseValues[NoiseIndex];
@@ -100,7 +110,8 @@ void AProcuduralTerrain::CreateMesh() {
 			const float V = (float)Y / Width;
 			Uv0.Add(FVector2D(U, V));
 
-			if (Y < Height - 1 && X < Width - 1) {
+			if (Y < (Height - 1) && X < (Width - 1)) {				
+				const int CurrentIndex = YIndexOffset + XSteps;
 				// Vertex setup
 				//   0      1      2      3    ..    W-1
 				// (0+W)  (1+W)  (2+W)  (3+W)  .. (2W - 1)
@@ -111,25 +122,29 @@ void AProcuduralTerrain::CreateMesh() {
 				//     |\
 				//     | \
 				// X+W --- x+W+1
-				Triangles.Add(IndexOffset + X);
-				Triangles.Add(IndexOffset + X + Width);
-				Triangles.Add(IndexOffset + X + Width + 1);
+				Triangles.Add(CurrentIndex);
+				Triangles.Add(CurrentIndex + VerticesPerRow);
+				Triangles.Add(CurrentIndex + VerticesPerRow + 1);
 
 				// X --- X+1    
 				//   \ |
 				//    \|
-				//     X+1+W
-				Triangles.Add(IndexOffset + X);
-				Triangles.Add(IndexOffset + X + 1 + Width);
-				Triangles.Add(IndexOffset + X + 1);
+				//     X+W+1
+				Triangles.Add(CurrentIndex);
+				Triangles.Add(CurrentIndex + VerticesPerRow + 1);
+				Triangles.Add(CurrentIndex + 1);
 			}
 		}
 	}
-	
+	check(Triangles.Num() == NumIndices);
+
 	Mesh->CreateMeshSection_LinearColor(0, Vertices, Triangles, {}, Uv0, {}, {}, false);
 }
 
 void AProcuduralTerrain::UpdateTexture() {
+	const int Width = AProcuduralTerrain::ChunkSize;
+	const int Height = AProcuduralTerrain::ChunkSize;
+
 	FTexture2DMipMap* MipMap = &Texture->GetPlatformData()->Mips[0];
 	FByteBulkData* ImageData = &MipMap->BulkData;
 	uint8* RawImageData = (uint8*)ImageData->Lock(LOCK_READ_WRITE);

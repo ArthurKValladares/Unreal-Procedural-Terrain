@@ -68,6 +68,19 @@ enum class EDisplayTexture : uint8 {
 	Color
 };
 
+// TODO: Better way to get like a static array of multiples you can choose from
+UENUM()
+enum class EMapLod : uint8 {
+	One = 1,
+	Two = 2,
+	Four = 4,
+	Six = 6,
+	Eight = 8,
+	Ten = 10,
+	Twelve = 12
+};
+
+
 UCLASS()
 class PROCEDURALTERRAIN_API AProcuduralTerrain : public AActor
 {
@@ -81,10 +94,9 @@ class PROCEDURALTERRAIN_API AProcuduralTerrain : public AActor
 	UMaterial* Material;
 	UMaterialInstanceDynamic* MaterialInstance;
 
+	static const int ChunkSize = 241;
 	UPROPERTY(EditAnywhere)
-	int Width;
-	UPROPERTY(EditAnywhere)
-	int Height;
+	EMapLod MapLod;
 	UPROPERTY(EditAnywhere)
 	float TileSize;
 	UPROPERTY(EditAnywhere)
