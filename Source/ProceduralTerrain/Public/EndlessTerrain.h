@@ -7,7 +7,9 @@
 
 struct FTerrainChunk {
 	FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint Point, int Size);
-
+	int GetSectionIndex() const {
+		return SectionIndex;
+	}
 private:
 	FIntPoint Position;
 	int SectionIndex;
@@ -23,8 +25,11 @@ class PROCEDURALTERRAIN_API AEndlessTerrain : public AActor
 
 	UPROPERTY(VisibleAnywhere)
 	UProceduralMeshComponent* Mesh;
+	UPROPERTY(EditAnywhere)
+	UMaterial* Material;
 
 	TMap<FIntPoint, FTerrainChunk> TerrainMap;
+	TArray<FTerrainChunk> ChunksVisibleLastFrame;
 
 	int NumChunksInViewDistance() const;
 
@@ -41,6 +46,9 @@ public:
 	int CurrSectionIndex() const;
 	UProceduralMeshComponent* GetMesh() {
 		return Mesh;
+	}
+	UMaterial* GetMaterial() {
+		return Material;
 	}
 
 	virtual void Tick(float DeltaTime) override;
