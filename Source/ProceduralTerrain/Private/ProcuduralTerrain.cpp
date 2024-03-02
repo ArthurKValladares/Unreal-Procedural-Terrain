@@ -15,8 +15,7 @@ AProcuduralTerrain::AProcuduralTerrain()
 	: Mesh(CreateDefaultSubobject<UProceduralMeshComponent>("GeneratedMesh"))
 	, Material(CreateDefaultSubobject<UMaterial>("NoiseMaterial"))
 	, MapLod(EMapLod::One)
-	, TileSize(5.)
-	, ElevationMultiplier( (AProcuduralTerrain::ChunkSize * TileSize) / 3.)
+	, ElevationMultiplier( (ChunkSize * TileSize) / 3.)
 	, ElevationCurve(CreateDefaultSubobject<UCurveFloat>("ElevationCurve"))
 	, RandomSeed(1)
 	, Scale(60.)
@@ -36,8 +35,8 @@ AProcuduralTerrain::AProcuduralTerrain()
 void AProcuduralTerrain::OnConstruction(const FTransform& Transform) {
 	Super::OnConstruction(Transform);
 
-	const int Width = AProcuduralTerrain::ChunkSize;
-	const int Height = AProcuduralTerrain::ChunkSize;
+	const int Width = ChunkSize;
+	const int Height = ChunkSize;
 	check((Width - 1) % static_cast<int>(MapLod) == 0);
 
 	Noise.Init(RandomSeed, Width, Height, Scale, Octaves, Persistance, Lacunarity, NoiseOffset);

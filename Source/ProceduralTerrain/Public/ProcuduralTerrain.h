@@ -94,11 +94,11 @@ class PROCEDURALTERRAIN_API AProcuduralTerrain : public AActor
 	UMaterial* Material;
 	UMaterialInstanceDynamic* MaterialInstance;
 
-	static const int ChunkSize = 241;
+	static constexpr int ChunkSize = 241;
+	static constexpr float TileSize = 5.;
+
 	UPROPERTY(EditAnywhere)
 	EMapLod MapLod;
-	UPROPERTY(EditAnywhere)
-	float TileSize;
 	UPROPERTY(EditAnywhere)
 	float ElevationMultiplier;
 	UPROPERTY(EditAnywhere)
@@ -132,7 +132,7 @@ class PROCEDURALTERRAIN_API AProcuduralTerrain : public AActor
 public:	
 	AProcuduralTerrain();
 	static int GetChunkSize() {
-		return ChunkSize;
+		return ChunkSize * TileSize;
 	}
 
 protected:

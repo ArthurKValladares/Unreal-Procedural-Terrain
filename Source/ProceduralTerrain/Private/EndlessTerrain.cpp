@@ -28,7 +28,7 @@ FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint Point, in
 }
 
 AEndlessTerrain::AEndlessTerrain()
-	: ViewDistance(300.0)
+	: ViewDistance(3000.0)
 	, Mesh(CreateDefaultSubobject<UProceduralMeshComponent>("EndlessMesh"))
 {
 	PrimaryActorTick.bCanEverTick = true;
