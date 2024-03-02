@@ -30,6 +30,8 @@ AProcuduralTerrain::AProcuduralTerrain()
 	check(Mesh);
 	check(Material);
 
+	//PrimaryActorTick.bCanEverTick = true;
+	
 	RootComponent = Mesh;
 }
 
