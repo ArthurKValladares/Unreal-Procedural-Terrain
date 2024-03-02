@@ -2,16 +2,52 @@
 
 #include "EndlessTerrain.h"
 
+FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint Point, int Size) {
+	Position = Point * Size;
+
+	// TODO: Just Creating a plane here, will make better later
+	const float HalfSize = (float)Size / 2.;
+
+	TArray<FVector> Vertices;
+	Vertices.Add(FVector(-HalfSize, -HalfSize, 0.0));
+	Vertices.Add(FVector(HalfSize, -HalfSize, 0.0));
+	Vertices.Add(FVector(-HalfSize, HalfSize, 0.0));
+	Vertices.Add(FVector(HalfSize, HalfSize, 0.0));
+
+	TArray<int32> Triangles;
+	Triangles.Add(0);
+	Triangles.Add(1);
+	Triangles.Add(2);
+	Triangles.Add(2);
+	Triangles.Add(1);
+	Triangles.Add(3);
+
+	SectionIndex = ParentTerrain->CurrSectionIndex();
+
+	ParentTerrain->GetMesh()->CreateMeshSection_LinearColor(SectionIndex, Vertices, Triangles, {}, {}, {}, {}, false);
+}
+
 AEndlessTerrain::AEndlessTerrain()
+	: ViewDistance(300.0)
+	, Mesh(CreateDefaultSubobject<UProceduralMeshComponent>("EndlessMesh"))
 {
+	PrimaryActorTick.bCanEverTick = true;
 }
 
 AEndlessTerrain::~AEndlessTerrain()
 {
 }
 
+void AEndlessTerrain::OnConstruction(const FTransform& Transform) {
+	Super::OnConstruction(Transform);
+}
+
 int AEndlessTerrain::NumChunksInViewDistance() const {
 	return FGenericPlatformMath::RoundToInt(ViewDistance / AProcuduralTerrain::GetChunkSize());
+}
+
+int AEndlessTerrain::CurrSectionIndex() const {
+	return TerrainMap.Num();
 }
 
 void AEndlessTerrain::UpdateVisibleChunks() {
@@ -33,11 +69,22 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 
 				}
 				else {
-					// TODO: I need to move all the modifiable params from AProcuduralTerrain to AEndlessTerrain,
-					// And pass them in here in the constructor
-					//TerrainMap.Add(CurrentChunkCoord, AProcuduralTerrain());
+					FTerrainChunk Chunk(this, CurrentChunkCoord, AProcuduralTerrain::GetChunkSize());
+					TerrainMap.Add(CurrentChunkCoord, Chunk);
 				}
 			}
 		}
 	}
+}
+
+void AEndlessTerrain::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
+void AEndlessTerrain::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	UpdateVisibleChunks();
 }

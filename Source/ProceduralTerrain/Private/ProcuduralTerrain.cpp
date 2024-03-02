@@ -29,8 +29,6 @@ AProcuduralTerrain::AProcuduralTerrain()
 {
 	check(Mesh);
 	check(Material);
-
-	//PrimaryActorTick.bCanEverTick = true;
 	
 	RootComponent = Mesh;
 }
@@ -59,13 +57,11 @@ void AProcuduralTerrain::OnConstruction(const FTransform& Transform) {
 	CreateMesh();
 }
 
-// Called when the game starts or when spawned
 void AProcuduralTerrain::BeginPlay()
 {
 	Super::BeginPlay();
 }
 
-// Called every frame
 void AProcuduralTerrain::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
