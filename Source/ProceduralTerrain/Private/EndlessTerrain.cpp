@@ -11,7 +11,7 @@ AEndlessTerrain::~AEndlessTerrain()
 }
 
 int AEndlessTerrain::NumChunksInViewDistance() const {
-	return FGenericPlatformMath::RoundToInt(ViewDistance / AProcuduralTerrain::ChunkSize());
+	return FGenericPlatformMath::RoundToInt(ViewDistance / AProcuduralTerrain::GetChunkSize());
 }
 
 void AEndlessTerrain::UpdateVisibleChunks() {
@@ -19,9 +19,9 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 	if (Player) {
 		const FVector Location = Player->GetPawnOrSpectator()->GetActorLocation();
 		const int CurrentChunkCoordX =
-			FGenericPlatformMath::RoundToInt(Location.X / AProcuduralTerrain::ChunkSize());
+			FGenericPlatformMath::RoundToInt(Location.X / AProcuduralTerrain::GetChunkSize());
 		const int CurrentChunkCoordY =
-			FGenericPlatformMath::RoundToInt(Location.Y / AProcuduralTerrain::ChunkSize());
+			FGenericPlatformMath::RoundToInt(Location.Y / AProcuduralTerrain::GetChunkSize());
 
 		const int ChunksInViewDistance = NumChunksInViewDistance();
 
@@ -35,7 +35,7 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 				else {
 					// TODO: I need to move all the modifiable params from AProcuduralTerrain to AEndlessTerrain,
 					// And pass them in here in the constructor
-					TerrainMap.Add(CurrentChunkCoord, AProcuduralTerrain());
+					//TerrainMap.Add(CurrentChunkCoord, AProcuduralTerrain());
 				}
 			}
 		}

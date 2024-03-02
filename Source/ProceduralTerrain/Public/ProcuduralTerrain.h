@@ -131,7 +131,7 @@ class PROCEDURALTERRAIN_API AProcuduralTerrain : public AActor
 	void UpdateTexture();
 public:	
 	AProcuduralTerrain();
-	static int ChunkSize() {
+	static int GetChunkSize() {
 		return ChunkSize;
 	}
 
