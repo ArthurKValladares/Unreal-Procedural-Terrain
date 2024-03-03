@@ -29,8 +29,6 @@ void NoiseMap::Init(int Seed, int W, int H, float Scale, int Octaves, float Pers
 		OctaveOffsets[I] = FVector2D(X, Y);
 	}
 
-	const float HalfWidth = Width / 2.;
-	const float HalfHeight = Height / 2.;
 	MaxNoise = std::numeric_limits<float>::min();
 	MinNoise = std::numeric_limits<float>::max();
 	for (int Y = 0; Y < Height; ++Y) {
@@ -42,8 +40,8 @@ void NoiseMap::Init(int Seed, int W, int H, float Scale, int Octaves, float Pers
 			float NoiseHeight = 0.;
 
 			for (int I = 0; I < Octaves; ++I) {
-				const float SampleX = ((X + NoiseOffset.X) - HalfWidth) / Scale * Frequency + OctaveOffsets[I].X;
-				const float SampleY = ((Y + NoiseOffset.Y) - HalfHeight) / Scale * Frequency + OctaveOffsets[I].Y;
+				const float SampleX = (X + NoiseOffset.X) / Scale * Frequency + OctaveOffsets[I].X;
+				const float SampleY = (Y + NoiseOffset.Y) / Scale * Frequency + OctaveOffsets[I].Y;
 
 				const float Noise = Perlin2D(SampleX, SampleY) * 2. - 1.;
 				NoiseHeight += Noise * Amplitude;
