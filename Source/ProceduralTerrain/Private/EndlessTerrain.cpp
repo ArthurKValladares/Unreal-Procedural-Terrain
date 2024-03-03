@@ -32,12 +32,12 @@ FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint Point, in
 }
 
 bool FTerrainChunk::IsInVisibleDistance(FVector2D SourceLocation, float ViewDistance) const {
-	const float Distance = Rect.ComputeSquaredDistanceToPoint(SourceLocation);
+	const float Distance = FGenericPlatformMath::Sqrt(Rect.ComputeSquaredDistanceToPoint(SourceLocation));
 	return Distance <= ViewDistance;
 }
 
 AEndlessTerrain::AEndlessTerrain()
-	: ViewDistance(3000.0)
+	: ViewDistance(6000.0)
 	, Mesh(CreateDefaultSubobject<UProceduralMeshComponent>("EndlessMesh"))
 	, Material(CreateDefaultSubobject<UMaterial>("EndlessMaterial"))
 {
