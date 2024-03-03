@@ -90,7 +90,7 @@ class PROCEDURALTERRAIN_API AProcuduralTerrain : public AActor
 
 	UPROPERTY(VisibleAnywhere)
 	UProceduralMeshComponent* Mesh;
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere)
 	UMaterial* Material;
 	UMaterialInstanceDynamic* MaterialInstance;
 

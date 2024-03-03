@@ -42,8 +42,8 @@ void NoiseMap::Init(int Seed, int W, int H, float Scale, int Octaves, float Pers
 			float NoiseHeight = 0.;
 
 			for (int I = 0; I < Octaves; ++I) {
-				const float SampleX = (X - HalfWidth) / Scale * Frequency + OctaveOffsets[I].X + NoiseOffset.X;
-				const float SampleY = (Y - HalfHeight) / Scale * Frequency + OctaveOffsets[I].Y + NoiseOffset.Y;
+				const float SampleX = ((X + NoiseOffset.X) - HalfWidth) / Scale * Frequency + OctaveOffsets[I].X;
+				const float SampleY = ((Y + NoiseOffset.Y) - HalfHeight) / Scale * Frequency + OctaveOffsets[I].Y;
 
 				const float Noise = Perlin2D(SampleX, SampleY) * 2. - 1.;
 				NoiseHeight += Noise * Amplitude;
