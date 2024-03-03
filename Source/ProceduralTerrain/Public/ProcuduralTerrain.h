@@ -123,6 +123,7 @@ class PROCEDURALTERRAIN_API AProcuduralTerrain : public AActor
 	UPROPERTY(EditAnywhere)
 	TArray<FTerrainParams> TerrainParams;
 
+	// TODO: Will use multiple textures
 	UTexture2D* Texture;
 
 	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent);

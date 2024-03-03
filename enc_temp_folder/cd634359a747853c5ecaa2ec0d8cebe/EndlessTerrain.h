@@ -23,6 +23,7 @@ class PROCEDURALTERRAIN_API AEndlessTerrain : public AActor
 {
 	GENERATED_BODY()
 
+public:
 	UPROPERTY(EditAnywhere)
 	float ViewDistance;
 
