@@ -7,11 +7,14 @@
 
 struct FTerrainChunk {
 	FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint Point, int Size);
+	// NOTE: 2D Ditance ignoring Z coordinate. think about it later
+	bool IsInVisibleDistance(FVector2D SourceLocation, float ViewDistance) const;
+
 	int GetSectionIndex() const {
 		return SectionIndex;
 	}
 private:
-	FIntPoint Position;
+	FBox2D Rect;
 	int SectionIndex;
 };
 

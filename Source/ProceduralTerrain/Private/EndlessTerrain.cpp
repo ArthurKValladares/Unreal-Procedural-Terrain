@@ -3,12 +3,13 @@
 #include "EndlessTerrain.h"
 
 FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint Point, int Size) {
-	Position = Point * Size;
+	FVector2D Center = Point * Size;
+	
+	const float HalfSize = (float)Size / 2.;
+	Rect = FBox2D(Center - HalfSize, Center + HalfSize);
 
 	// TODO: Just Creating a plane here, will make better later
-	const float HalfSize = (float)Size / 2.;
-
-	FVector Position3D = FVector(Position.X, Position.Y, 0.0);
+	FVector Position3D = FVector(Center.X, Center.Y, 0.0);
 	TArray<FVector> Vertices;
 	Vertices.Add(Position3D + FVector(-HalfSize, -HalfSize, 0.0));
 	Vertices.Add(Position3D + FVector(HalfSize, -HalfSize, 0.0));
@@ -28,6 +29,11 @@ FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint Point, in
 	ParentTerrain->GetMesh()->CreateMeshSection_LinearColor(SectionIndex, Vertices, Triangles, {}, {}, {}, {}, false);
 	ParentTerrain->GetMesh()->SetMaterial(SectionIndex, ParentTerrain->GetMaterial());
 	ParentTerrain->GetMesh()->SetMeshSectionVisible(SectionIndex, false);
+}
+
+bool FTerrainChunk::IsInVisibleDistance(FVector2D SourceLocation, float ViewDistance) const {
+	const float Distance = Rect.ComputeSquaredDistanceToPoint(SourceLocation);
+	return Distance <= ViewDistance;
 }
 
 AEndlessTerrain::AEndlessTerrain()
@@ -63,10 +69,12 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 	for (const FTerrainChunk& Chunk : ChunksVisibleLastFrame) {
 		Mesh->SetMeshSectionVisible(Chunk.GetSectionIndex(), false);
 	}
+	ChunksVisibleLastFrame.Empty();
 
 	const auto* Player = GetWorld()->GetFirstPlayerController();
 	if (Player) {
 		const FVector Location = Player->GetPawnOrSpectator()->GetActorLocation();
+
 		const int CurrentChunkCoordX =
 			FGenericPlatformMath::RoundToInt(Location.X / AProcuduralTerrain::GetChunkSize());
 		const int CurrentChunkCoordY =
@@ -80,15 +88,19 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 				
 				if (TerrainMap.Contains(CurrentChunkCoord)) {
 					const FTerrainChunk& Chunk = TerrainMap[CurrentChunkCoord];
-					// TODO: reduce duplication
-					Mesh->SetMeshSectionVisible(Chunk.GetSectionIndex(), true);
-					ChunksVisibleLastFrame.Add(Chunk);
+					// TODO: Redeuce duplication below
+					if (Chunk.IsInVisibleDistance(FVector2D(Location.X, Location.Y), ViewDistance)) {
+						Mesh->SetMeshSectionVisible(Chunk.GetSectionIndex(), true);
+						ChunksVisibleLastFrame.Add(Chunk);
+					}
 				}
 				else {
 					FTerrainChunk Chunk(this, CurrentChunkCoord, AProcuduralTerrain::GetChunkSize());
-					Mesh->SetMeshSectionVisible(Chunk.GetSectionIndex(), true);
-					ChunksVisibleLastFrame.Add(Chunk);
-					TerrainMap.Add(CurrentChunkCoord, Chunk);
+					if (Chunk.IsInVisibleDistance(FVector2D(Location.X, Location.Y), ViewDistance)) {
+						Mesh->SetMeshSectionVisible(Chunk.GetSectionIndex(), true);
+						ChunksVisibleLastFrame.Add(Chunk);
+					}
+					TerrainMap.Add(CurrentChunkCoord, std::move(Chunk));
 				}
 			}
 		}
