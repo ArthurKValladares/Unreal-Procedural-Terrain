@@ -132,9 +132,6 @@ class PROCEDURALTERRAIN_API AProcuduralTerrain : public AActor
 	void UpdateTexture();
 public:	
 	AProcuduralTerrain();
-	static int GetChunkSize() {
-		return ChunkSize * TileSize;
-	}
 
 protected:
 	virtual void OnConstruction(const FTransform& Transform) override;

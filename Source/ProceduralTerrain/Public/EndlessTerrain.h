@@ -6,7 +6,7 @@
 
 
 struct FTerrainChunk {
-	FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint Point, int Size);
+	FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint Point, float Size);
 	// NOTE: 2D Ditance ignoring Z coordinate. think about it later
 	bool IsInVisibleDistance(FVector2D SourceLocation, float ViewDistance) const;
 
@@ -14,14 +14,35 @@ struct FTerrainChunk {
 		return SectionIndex;
 	}
 private:
+	NoiseMap Noise;
 	FBox2D Rect;
 	int SectionIndex;
+	// TODO: Will need an `update` function later
+	EMapLod MapLod;
 };
 
 UCLASS()
 class PROCEDURALTERRAIN_API AEndlessTerrain : public AActor
 {
 	GENERATED_BODY()
+
+	friend FTerrainChunk;
+
+	// TODO: For now, duplicating a lot of stuff from `ProceduranTerrain`. Will delete that class at some point
+	static constexpr int VerticesInChunk = 241;
+	static constexpr float TileSize = 5.;
+	static constexpr float ChunkSize() {
+		return (VerticesInChunk - 1)* TileSize;
+	}
+
+	UPROPERTY(EditAnywhere)
+	float Scale;
+	UPROPERTY(EditAnywhere)
+	int Octaves;
+	UPROPERTY(EditAnywhere)
+	float Persistance;
+	UPROPERTY(EditAnywhere)
+	float Lacunarity;
 
 	UPROPERTY(EditAnywhere)
 	float ViewDistance;
