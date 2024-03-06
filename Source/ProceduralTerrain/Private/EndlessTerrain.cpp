@@ -122,6 +122,7 @@ AEndlessTerrain::~AEndlessTerrain()
 
 void AEndlessTerrain::OnConstruction(const FTransform& Transform) {
 	Super::OnConstruction(Transform);
+	UpdateVisibleChunks();
 }
 
 int AEndlessTerrain::NumChunksInViewDistance() const {
