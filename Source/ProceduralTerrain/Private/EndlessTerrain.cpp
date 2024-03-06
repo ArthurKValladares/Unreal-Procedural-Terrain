@@ -49,7 +49,7 @@ FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint Point, fl
 			if (IsValid(ParentTerrain->ElevationCurve)) {
 				MultiplierEffectiveness = ParentTerrain->ElevationCurve->GetFloatValue(NormalizedNoise);
 			}
-			Vertices.Add(FVector(XPos + XOffset, YPos + YOffset, ZOffset + MultiplierEffectiveness * ParentTerrain->ElevationMultiplier));
+			Vertices.Add(FVector(Center.X + XPos + XOffset, Center.Y + YPos + YOffset, ZOffset + MultiplierEffectiveness * ParentTerrain->ElevationMultiplier));
 
 			const float U = (float)X / Width;
 			const float V = (float)Y / Width;
