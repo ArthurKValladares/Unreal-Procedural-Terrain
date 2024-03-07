@@ -139,7 +139,7 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 	}
 	ChunksVisibleLastFrame.Empty();
 
-	
+	/*
 	const auto* Player = GetWorld()->GetFirstPlayerController();
 	FVector Location;
 	if (Player) {
@@ -178,7 +178,16 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 			}
 		}
 	}
-	
+	*/
+	FIntPoint CurrentChunkCoord = FIntPoint(0, 0);
+	FTerrainChunk Chunk1(this, CurrentChunkCoord, ChunkSize());
+	Mesh->SetMeshSectionVisible(Chunk1.GetSectionIndex(), true);
+	TerrainMap.Add(CurrentChunkCoord, std::move(Chunk1));
+
+	CurrentChunkCoord = FIntPoint(1, 0);
+	FTerrainChunk Chunk2(this, CurrentChunkCoord, ChunkSize());
+	Mesh->SetMeshSectionVisible(Chunk2.GetSectionIndex(), true);
+	TerrainMap.Add(CurrentChunkCoord, std::move(Chunk2));
 }
 
 void AEndlessTerrain::BeginPlay()
