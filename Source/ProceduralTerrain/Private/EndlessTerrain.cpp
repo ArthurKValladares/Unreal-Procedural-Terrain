@@ -100,7 +100,7 @@ AEndlessTerrain::AEndlessTerrain()
 	, Octaves(1)
 	, Persistance(0.5)
 	, Lacunarity(1.0)
-	, ViewDistance(6000.0)
+	, ViewDistance(3000.0)
 	, Mesh(CreateDefaultSubobject<UProceduralMeshComponent>("EndlessMesh"))
 	, Material(CreateDefaultSubobject<UMaterial>("EndlessMaterial"))
 	, ElevationMultiplier(AEndlessTerrain::VerticesInChunk / 3.)
@@ -139,40 +139,46 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 	}
 	ChunksVisibleLastFrame.Empty();
 
+	
 	const auto* Player = GetWorld()->GetFirstPlayerController();
+	FVector Location;
 	if (Player) {
-		const FVector Location = Player->GetPawnOrSpectator()->GetActorLocation();
+		Location = Player->GetPawnOrSpectator()->GetActorLocation();
+	}
+	else {
+		Location = FVector(0.);
+	}
 
-		const int CurrentChunkCoordX =
-			FGenericPlatformMath::RoundToInt(Location.X / ChunkSize());
-		const int CurrentChunkCoordY =
-			FGenericPlatformMath::RoundToInt(Location.Y / ChunkSize());
+	const int CurrentChunkCoordX =
+		FGenericPlatformMath::RoundToInt(Location.X / ChunkSize());
+	const int CurrentChunkCoordY =
+		FGenericPlatformMath::RoundToInt(Location.Y / ChunkSize());
 
-		const int ChunksInViewDistance = NumChunksInViewDistance();
+	const int ChunksInViewDistance = NumChunksInViewDistance();
 
-		for (int YOffset = -ChunksInViewDistance; YOffset < ChunksInViewDistance; ++YOffset) {
-			for (int XOffset = -ChunksInViewDistance; XOffset < ChunksInViewDistance; ++XOffset) {
-				const FIntPoint CurrentChunkCoord = FIntPoint(CurrentChunkCoordX + XOffset, CurrentChunkCoordY + YOffset);
+	for (int YOffset = -ChunksInViewDistance; YOffset < ChunksInViewDistance; ++YOffset) {
+		for (int XOffset = -ChunksInViewDistance; XOffset < ChunksInViewDistance; ++XOffset) {
+			const FIntPoint CurrentChunkCoord = FIntPoint(CurrentChunkCoordX + XOffset, CurrentChunkCoordY + YOffset);
 				
-				if (TerrainMap.Contains(CurrentChunkCoord)) {
-					const FTerrainChunk& Chunk = TerrainMap[CurrentChunkCoord];
-					// TODO: Redeuce duplication below
-					if (Chunk.IsInVisibleDistance(FVector2D(Location.X, Location.Y), ViewDistance)) {
-						Mesh->SetMeshSectionVisible(Chunk.GetSectionIndex(), true);
-						ChunksVisibleLastFrame.Add(Chunk);
-					}
+			if (TerrainMap.Contains(CurrentChunkCoord)) {
+				const FTerrainChunk& Chunk = TerrainMap[CurrentChunkCoord];
+				// TODO: Redeuce duplication below
+				if (Chunk.IsInVisibleDistance(FVector2D(Location.X, Location.Y), ViewDistance)) {
+					Mesh->SetMeshSectionVisible(Chunk.GetSectionIndex(), true);
+					ChunksVisibleLastFrame.Add(Chunk);
 				}
-				else {
-					FTerrainChunk Chunk(this, CurrentChunkCoord, ChunkSize());
-					if (Chunk.IsInVisibleDistance(FVector2D(Location.X, Location.Y), ViewDistance)) {
-						Mesh->SetMeshSectionVisible(Chunk.GetSectionIndex(), true);
-						ChunksVisibleLastFrame.Add(Chunk);
-					}
-					TerrainMap.Add(CurrentChunkCoord, std::move(Chunk));
+			}
+			else {
+				FTerrainChunk Chunk(this, CurrentChunkCoord, ChunkSize());
+				if (Chunk.IsInVisibleDistance(FVector2D(Location.X, Location.Y), ViewDistance)) {
+					Mesh->SetMeshSectionVisible(Chunk.GetSectionIndex(), true);
+					ChunksVisibleLastFrame.Add(Chunk);
 				}
+				TerrainMap.Add(CurrentChunkCoord, std::move(Chunk));
 			}
 		}
 	}
+	
 }
 
 void AEndlessTerrain::BeginPlay()
