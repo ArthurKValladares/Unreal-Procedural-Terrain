@@ -33,7 +33,7 @@ class PROCEDURALTERRAIN_API AEndlessTerrain : public AActor
 
 	// TODO: For now, duplicating a lot of stuff from `ProceduranTerrain`. Will delete that class at some point
 	static constexpr int VerticesInChunk = 241;
-	static constexpr float TileSize = 5.;
+	static constexpr float TileSize = 3.0;
 	static constexpr float ChunkSize() {
 		return (VerticesInChunk - 1)* TileSize;
 	}
@@ -65,7 +65,7 @@ class PROCEDURALTERRAIN_API AEndlessTerrain : public AActor
 	FRandomStream RandomStream;
 
 	TMap<FIntPoint, FTerrainChunk> TerrainMap;
-	TArray<FTerrainChunk> ChunksVisibleLastFrame;
+	TArray<FIntPoint> ChunksVisibleLastFrame;
 
 	int NumChunksInViewDistance() const;
 

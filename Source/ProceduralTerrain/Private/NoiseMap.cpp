@@ -77,6 +77,7 @@ void NoiseMap::Init(ENormalizeMode NormalizeMode, int Seed, int W, int H, float 
 					break;
 				}
 				case ENormalizeMode::Global: {
+					// TODO: Re-think this later
 					NoiseValues[NoiseIndex] = std::max(0.0, (NoiseValues[NoiseIndex] + 1) / (2. * MaxPossibleHeight / 1.75));
 					break;
 				}
