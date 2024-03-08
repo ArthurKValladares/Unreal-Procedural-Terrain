@@ -2,21 +2,23 @@
 
 #include "EndlessTerrain.h"
 
-namespace {
-	float InverseLerp(float X, float Y, float V)
-	{
-		return (V - X) / (Y - X);
-	}
+FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint ChunkCoord, float  Size)
+	: MapLod(EMapLod::One)
+	, ChunkCoord(ChunkCoord)
+{
+	FVector2D Center = ChunkCoord * Size;
+	const float HalfSize = (float)Size / 2.;
+
+	Rect = FBox2D(Center - HalfSize, Center + HalfSize);
+	SectionIndex = ParentTerrain->CurrSectionIndex();
 }
 
-FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint Point, float  Size) {
-	MapLod = EMapLod::One;
-	FVector2D Center = Point * Size;
-	const float HalfSize = (float)Size / 2.;
-	Rect = FBox2D(Center - HalfSize, Center + HalfSize);
+void FTerrainChunk::Init(AEndlessTerrain* ParentTerrain) {
+	const FVector2D Center = Rect.GetCenter();
+	const float HalfSize = Rect.GetSize().X / 2.;
+	check(Rect.GetSize().X == Rect.GetSize().Y);
 
-	// TODO: Should Width and Height be -1?
-	Noise.Init(ParentTerrain->RandomSeed, ParentTerrain->VerticesInChunk, ParentTerrain->VerticesInChunk, ParentTerrain->Scale, ParentTerrain->Octaves, ParentTerrain->Persistance, ParentTerrain->Lacunarity, Point * Size);
+	Noise.Init(ENormalizeMode::Global, ParentTerrain->RandomSeed, ParentTerrain->VerticesInChunk, ParentTerrain->VerticesInChunk, ParentTerrain->Scale, ParentTerrain->Octaves, ParentTerrain->Persistance, ParentTerrain->Lacunarity, ChunkCoord * (ParentTerrain->VerticesInChunk - 1));
 
 	const int StepSize = static_cast<int>(MapLod);
 	const int Width = AEndlessTerrain::VerticesInChunk;
@@ -41,13 +43,12 @@ FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint Point, fl
 			// TODO: Duplicated code here, think about it soon, maybe save normalized noise instead of absolute
 			const int NoiseIndex = Y * Width + X;
 			const float NoiseValue = Noise.NoiseValues[NoiseIndex];
-			const float NormalizedNoise = InverseLerp(Noise.MinNoise, Noise.MaxNoise, NoiseValue);
 
 			const float XPos = X * AEndlessTerrain::TileSize;
 			const float YPos = Y * AEndlessTerrain::TileSize;
 			float MultiplierEffectiveness = 1.0;
 			if (IsValid(ParentTerrain->ElevationCurve)) {
-				MultiplierEffectiveness = ParentTerrain->ElevationCurve->GetFloatValue(NormalizedNoise);
+				MultiplierEffectiveness = ParentTerrain->ElevationCurve->GetFloatValue(NoiseValue);
 			}
 			Vertices.Add(FVector(Center.X + XPos + XOffset, Center.Y + YPos + YOffset, ZOffset + MultiplierEffectiveness * ParentTerrain->ElevationMultiplier));
 
@@ -83,8 +84,6 @@ FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint Point, fl
 	}
 	check(Triangles.Num() == NumIndices);
 
-	// TODO: Cleanup
-	SectionIndex = ParentTerrain->CurrSectionIndex();
 	ParentTerrain->GetMesh()->CreateMeshSection_LinearColor(SectionIndex, Vertices, Triangles, {}, Uv0, {}, {}, false);
 	ParentTerrain->GetMesh()->SetMaterial(SectionIndex, ParentTerrain->GetMaterial());
 	ParentTerrain->GetMesh()->SetMeshSectionVisible(SectionIndex, false);
@@ -103,7 +102,7 @@ AEndlessTerrain::AEndlessTerrain()
 	, ViewDistance(3000.0)
 	, Mesh(CreateDefaultSubobject<UProceduralMeshComponent>("EndlessMesh"))
 	, Material(CreateDefaultSubobject<UMaterial>("EndlessMaterial"))
-	, ElevationMultiplier(AEndlessTerrain::VerticesInChunk / 3.)
+	, ElevationMultiplier(AEndlessTerrain::VerticesInChunk / 2.)
 	, ElevationCurve(CreateDefaultSubobject<UCurveFloat>("ElevationCurve"))
 	, RandomSeed(0)
 	, RandomStream(FRandomStream(RandomSeed))
@@ -139,7 +138,6 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 	}
 	ChunksVisibleLastFrame.Empty();
 
-	/*
 	const auto* Player = GetWorld()->GetFirstPlayerController();
 	FVector Location;
 	if (Player) {
@@ -170,6 +168,7 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 			}
 			else {
 				FTerrainChunk Chunk(this, CurrentChunkCoord, ChunkSize());
+				Chunk.Init(this);
 				if (Chunk.IsInVisibleDistance(FVector2D(Location.X, Location.Y), ViewDistance)) {
 					Mesh->SetMeshSectionVisible(Chunk.GetSectionIndex(), true);
 					ChunksVisibleLastFrame.Add(Chunk);
@@ -178,16 +177,6 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 			}
 		}
 	}
-	*/
-	FIntPoint CurrentChunkCoord = FIntPoint(0, 0);
-	FTerrainChunk Chunk1(this, CurrentChunkCoord, ChunkSize());
-	Mesh->SetMeshSectionVisible(Chunk1.GetSectionIndex(), true);
-	TerrainMap.Add(CurrentChunkCoord, std::move(Chunk1));
-
-	CurrentChunkCoord = FIntPoint(1, 0);
-	FTerrainChunk Chunk2(this, CurrentChunkCoord, ChunkSize());
-	Mesh->SetMeshSectionVisible(Chunk2.GetSectionIndex(), true);
-	TerrainMap.Add(CurrentChunkCoord, std::move(Chunk2));
 }
 
 void AEndlessTerrain::BeginPlay()
@@ -199,5 +188,5 @@ void AEndlessTerrain::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	UpdateVisibleChunks();
+	//UpdateVisibleChunks();
 }

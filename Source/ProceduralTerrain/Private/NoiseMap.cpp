@@ -8,12 +8,17 @@ namespace {
 	float Perlin2D(float X, float Y) {
 		return FMath::PerlinNoise2D(FVector2D(X, Y));
 	}
+
+	float InverseLerp(float X, float Y, float V)
+	{
+		return (V - X) / (Y - X);
+	}
 }
 
 NoiseMap::NoiseMap() {
 }
 
-void NoiseMap::Init(int Seed, int W, int H, float Scale, int Octaves, float Persistance, float Lacunarity, FVector2D NoiseOffset)
+void NoiseMap::Init(ENormalizeMode NormalizeMode, int Seed, int W, int H, float Scale, int Octaves, float Persistance, float Lacunarity, FVector2D NoiseOffset)
 {
 	RandomStream = FRandomStream(Seed);
 
@@ -21,12 +26,18 @@ void NoiseMap::Init(int Seed, int W, int H, float Scale, int Octaves, float Pers
 	Height = H;
 	NoiseValues.SetNum(Width * Height);
 
+	float MaxPossibleHeight = 0.;
+	float Amplitude = 1.;
+	float Frequency = 1.;
 	TArray<FVector2D> OctaveOffsets;
 	OctaveOffsets.SetNum(Octaves);
 	for (int I = 0; I < Octaves; ++I) {
-		const float X = RandomStream.FRandRange(-100000, 100000);
-		const float Y = RandomStream.FRandRange(-100000, 100000);
+		const float X = RandomStream.FRandRange(-100000, 100000) + NoiseOffset.X;
+		const float Y = RandomStream.FRandRange(-100000, 100000) + NoiseOffset.Y;
 		OctaveOffsets[I] = FVector2D(X, Y);
+
+		MaxPossibleHeight += Amplitude;
+		Amplitude *= Persistance;
 	}
 
 	MaxNoise = std::numeric_limits<float>::min();
@@ -35,13 +46,13 @@ void NoiseMap::Init(int Seed, int W, int H, float Scale, int Octaves, float Pers
 		for (int X = 0; X < Width; ++X) {
 			const int NoiseIndex = Y * Width + X;
 
-			float Amplitude = 1.;
-			float Frequency = 1.;
+			Amplitude = 1.;
+			Frequency = 1.;
 			float NoiseHeight = 0.;
 
 			for (int I = 0; I < Octaves; ++I) {
-				const float SampleX = (X + NoiseOffset.X) / Scale * Frequency + OctaveOffsets[I].X;
-				const float SampleY = (Y + NoiseOffset.Y) / Scale * Frequency + OctaveOffsets[I].Y;
+				const float SampleX = (X + OctaveOffsets[I].X) / Scale * Frequency;
+				const float SampleY = (Y + OctaveOffsets[I].Y) / Scale * Frequency;
 
 				const float Noise = Perlin2D(SampleX, SampleY) * 2. - 1.;
 				NoiseHeight += Noise * Amplitude;
@@ -54,6 +65,23 @@ void NoiseMap::Init(int Seed, int W, int H, float Scale, int Octaves, float Pers
 			MinNoise = std::min(MinNoise, NoiseHeight);
 
 			NoiseValues[NoiseIndex] = NoiseHeight;
+		}
+	}
+
+	for (int Y = 0; Y < Height; ++Y) {
+		for (int X = 0; X < Width; ++X) {
+			const int NoiseIndex = Y * Width + X;
+			switch(NormalizeMode) {
+				case ENormalizeMode::Local: {
+					NoiseValues[NoiseIndex] = InverseLerp(MinNoise, MaxNoise, NoiseValues[NoiseIndex]);
+					break;
+				}
+				case ENormalizeMode::Global: {
+					NoiseValues[NoiseIndex] = std::max(0.0, (NoiseValues[NoiseIndex] + 1) / (2. * MaxPossibleHeight / 1.75));
+					break;
+				}
+			}
+			
 		}
 	}
 }

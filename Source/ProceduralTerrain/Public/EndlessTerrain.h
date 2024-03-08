@@ -6,7 +6,9 @@
 
 
 struct FTerrainChunk {
-	FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint Point, float Size);
+	FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint ChunkCoord, float Size);
+	void Init(AEndlessTerrain* ParentTerrain);
+
 	// NOTE: 2D Ditance ignoring Z coordinate. think about it later
 	bool IsInVisibleDistance(FVector2D SourceLocation, float ViewDistance) const;
 
@@ -14,11 +16,12 @@ struct FTerrainChunk {
 		return SectionIndex;
 	}
 private:
-	NoiseMap Noise;
+	EMapLod MapLod;
+	FIntPoint ChunkCoord;
 	FBox2D Rect;
 	int SectionIndex;
+	NoiseMap Noise;
 	// TODO: Will need an `update` function later
-	EMapLod MapLod;
 };
 
 UCLASS()

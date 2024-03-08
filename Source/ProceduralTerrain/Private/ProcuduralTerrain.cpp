@@ -4,13 +4,6 @@
 #include "ProcuduralTerrain.h"
 #include "UObject/Object.h"
 
-namespace {
-	float InverseLerp(float X, float Y, float V)
-	{
-		return (V - X) / (Y - X);
-	}
-}
-
 AProcuduralTerrain::AProcuduralTerrain()
 	: Mesh(CreateDefaultSubobject<UProceduralMeshComponent>("GeneratedMesh"))
 	, Material(CreateDefaultSubobject<UMaterial>("NoiseMaterial"))
@@ -39,7 +32,7 @@ void AProcuduralTerrain::OnConstruction(const FTransform& Transform) {
 	const int Height = ChunkSize;
 	check((Width - 1) % static_cast<int>(MapLod) == 0);
 
-	Noise.Init(RandomSeed, Width, Height, Scale, Octaves, Persistance, Lacunarity, NoiseOffset);
+	//Noise.Init(RandomSeed, Width, Height, Scale, Octaves, Persistance, Lacunarity, NoiseOffset);
 
 	Texture = UTexture2D::CreateTransient(Width, Height, PF_B8G8R8A8, "Texture");
 	Texture->Filter = TextureFilter::TF_Nearest;
@@ -93,13 +86,12 @@ void AProcuduralTerrain::CreateMesh() {
 			// TODO: Duplicated code here, think about it soon, maybe save normalized noise instead of absolute
 			const int NoiseIndex = Y * Width + X;
 			const float NoiseValue = Noise.NoiseValues[NoiseIndex];
-			const float NormalizedNoise = InverseLerp(Noise.MinNoise, Noise.MaxNoise, NoiseValue);
 
 			const float XPos = X * TileSize;
 			const float YPos = Y * TileSize;
 			float MultiplierEffectiveness = 1.0;
 			if (IsValid(ElevationCurve)) {
-				MultiplierEffectiveness = ElevationCurve->GetFloatValue(NormalizedNoise);
+				MultiplierEffectiveness = ElevationCurve->GetFloatValue(NoiseValue);
 			}
 			Vertices.Add(FVector(XPos + XOffset, YPos + YOffset, ZOffset + MultiplierEffectiveness * ElevationMultiplier));
 
@@ -150,13 +142,12 @@ void AProcuduralTerrain::UpdateTexture() {
 		for (int X = 0; X < Width; ++X) {
 			const int NoiseIndex = Y * Width + X;
 			const float NoiseValue = Noise.NoiseValues[NoiseIndex];
-			const float NormalizedNoise = InverseLerp(Noise.MinNoise, Noise.MaxNoise, NoiseValue);
 
 			const int TextureIndex = NoiseIndex * PixelSize;
 			switch (DisplayTexture)
 			{
 				case EDisplayTexture::Noise: {
-					const uint8 NoiseTexColor = NormalizedNoise * 255.;
+					const uint8 NoiseTexColor = NoiseValue * 255.;
 					RawImageData[TextureIndex] = NoiseTexColor;
 					RawImageData[TextureIndex + 1] = NoiseTexColor;
 					RawImageData[TextureIndex + 2] = NoiseTexColor;
@@ -165,7 +156,7 @@ void AProcuduralTerrain::UpdateTexture() {
 				}
 				case EDisplayTexture::Color: {
 					for (const FTerrainParams& Param : TerrainParams) {
-						if (NormalizedNoise <= Param.MaxHeight) {
+						if (NoiseValue <= Param.MaxHeight) {
 							const FColor Color = Param.Color;
 
 							RawImageData[TextureIndex] = Color.B;
