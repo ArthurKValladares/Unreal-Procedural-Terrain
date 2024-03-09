@@ -79,3 +79,4 @@ Windows/
 
 #Ignoring basically all non-code content for this repo
 Content/
+lfs/
