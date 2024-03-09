@@ -14,11 +14,22 @@ FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint ChunkCoor
 }
 
 void FTerrainChunk::Init(AEndlessTerrain* ParentTerrain) {
+	Noise.Init(ENormalizeMode::Global, ParentTerrain->RandomSeed, ParentTerrain->VerticesInChunk, ParentTerrain->VerticesInChunk, ParentTerrain->Scale, ParentTerrain->Octaves, ParentTerrain->Persistance, ParentTerrain->Lacunarity, ChunkCoord * (ParentTerrain->VerticesInChunk - 1));
+}
+
+void FTerrainChunk::SetLod(AEndlessTerrain* ParentTerrain, EMapLod Lod) {
+	MapLod = Lod;
+	Triangles.Empty();
+	Vertices.Empty();
+	Uv0.Empty();
+
 	const FVector2D Center = Rect.GetCenter();
 	const float HalfSize = Rect.GetSize().X / 2.;
 	check(Rect.GetSize().X == Rect.GetSize().Y);
 
-	Noise.Init(ENormalizeMode::Global, ParentTerrain->RandomSeed, ParentTerrain->VerticesInChunk, ParentTerrain->VerticesInChunk, ParentTerrain->Scale, ParentTerrain->Octaves, ParentTerrain->Persistance, ParentTerrain->Lacunarity, ChunkCoord * (ParentTerrain->VerticesInChunk - 1));
+	const float XOffset = -HalfSize;
+	const float YOffset = -HalfSize;
+	const float ZOffset = 0.0;
 
 	const int StepSize = static_cast<int>(MapLod);
 	const int Width = AEndlessTerrain::VerticesInChunk;
@@ -27,13 +38,6 @@ void FTerrainChunk::Init(AEndlessTerrain* ParentTerrain) {
 	const int VerticesPerRow = (Width - 1) / StepSize + 1;
 	const int NumIndices = (VerticesPerRow - 1) * (VerticesPerRow - 1) * 6;
 
-	const float XOffset = -HalfSize;
-	const float YOffset = -HalfSize;
-	const float ZOffset = 0.0;
-
-	TArray<FVector> Vertices;
-	TArray<FVector2D> Uv0;
-	TArray<int32> Triangles;
 	for (int Y = 0; Y < Height; Y += StepSize) {
 		const int YSteps = Y / StepSize;
 		const int YIndexOffset = YSteps * VerticesPerRow;
@@ -146,21 +150,23 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 		Location = FVector(0.);
 	}
 
-	const int CurrentChunkCoordX =
-		FGenericPlatformMath::RoundToInt(Location.X / ChunkSize());
-	const int CurrentChunkCoordY =
-		FGenericPlatformMath::RoundToInt(Location.Y / ChunkSize());
+	const FIntPoint OriginChunkCoord = FIntPoint(FGenericPlatformMath::RoundToInt(Location.X / ChunkSize()), FGenericPlatformMath::RoundToInt(Location.Y / ChunkSize()));
 
 	const int ChunksInViewDistance = NumChunksInViewDistance();
 
 	for (int YOffset = -ChunksInViewDistance; YOffset <= ChunksInViewDistance; ++YOffset) {
 		for (int XOffset = -ChunksInViewDistance; XOffset <= ChunksInViewDistance; ++XOffset) {
-			const FIntPoint CurrentChunkCoord = FIntPoint(CurrentChunkCoordX + XOffset, CurrentChunkCoordY + YOffset);
+			const FIntPoint CurrentChunkOffset = FIntPoint(XOffset, YOffset);
+			const FIntPoint CurrentChunkCoord = OriginChunkCoord + CurrentChunkOffset;
 				
+			const int DistanceInBlocksToOrigin = CurrentChunkOffset.Size();
+			const EMapLod Lod = LodFromDistance(DistanceInBlocksToOrigin);
+
 			if (TerrainMap.Contains(CurrentChunkCoord)) {
-				const FTerrainChunk& Chunk = TerrainMap[CurrentChunkCoord];
+				FTerrainChunk& Chunk = TerrainMap[CurrentChunkCoord];
 				// TODO: Redeuce duplication below
 				if (Chunk.IsInVisibleDistance(FVector2D(Location.X, Location.Y), ViewDistance)) {
+					Chunk.SetLod(this, Lod);
 					Mesh->SetMeshSectionVisible(Chunk.GetSectionIndex(), true);
 					ChunksVisibleLastFrame.Add(CurrentChunkCoord);
 				}
@@ -168,10 +174,12 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 			else {
 				FTerrainChunk Chunk(this, CurrentChunkCoord, ChunkSize());
 				// TODO: This init will need to be done in some sort of async block
+				// TODO: Can probably only create the vertices once (in Init), then just pass in the correct indices?
 				Chunk.Init(this);
-				if (Chunk.IsInVisibleDistance(FVector2D(Location.X, Location.Y), ViewDistance)) {
+				Chunk.SetLod(this, Lod);
+				Mesh->SetMaterial(Chunk.GetSectionIndex(), Material);
+				if (Chunk.IsInVisibleDistance(FVector2D(Location.X, Location.Y), ViewDistance)) {					
 					Mesh->SetMeshSectionVisible(Chunk.GetSectionIndex(), true);
-					Mesh->SetMaterial(Chunk.GetSectionIndex(), Material);
 					ChunksVisibleLastFrame.Add(CurrentChunkCoord);
 				}
 				TerrainMap.Add(CurrentChunkCoord, std::move(Chunk));

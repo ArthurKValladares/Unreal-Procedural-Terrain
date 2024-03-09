@@ -80,6 +80,11 @@ enum class EMapLod : uint8 {
 	Twelve = 12
 };
 
+inline EMapLod LodFromDistance(int Distance) {
+	if (Distance == 0) return EMapLod::One;
+	const int ClampedDistance = std::clamp(Distance, 1,  6);
+	return static_cast<EMapLod>(ClampedDistance * 2);
+}
 
 UCLASS()
 class PROCEDURALTERRAIN_API AProcuduralTerrain : public AActor
