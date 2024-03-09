@@ -29,7 +29,7 @@ void FTerrainChunk::Init(AEndlessTerrain* ParentTerrain) {
 
 	const float XOffset = -HalfSize;
 	const float YOffset = -HalfSize;
-	const float ZOffset = 10.0;
+	const float ZOffset = 0.0;
 
 	TArray<FVector> Vertices;
 	TArray<FVector2D> Uv0;
@@ -85,8 +85,6 @@ void FTerrainChunk::Init(AEndlessTerrain* ParentTerrain) {
 	check(Triangles.Num() == NumIndices);
 
 	ParentTerrain->GetMesh()->CreateMeshSection_LinearColor(SectionIndex, Vertices, Triangles, {}, Uv0, {}, {}, false);
-	ParentTerrain->GetMesh()->SetMaterial(SectionIndex, ParentTerrain->GetMaterial());
-	ParentTerrain->GetMesh()->SetMeshSectionVisible(SectionIndex, false);
 }
 
 bool FTerrainChunk::IsInVisibleDistance(FVector2D SourceLocation, float ViewDistance) const {
@@ -173,6 +171,7 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 				Chunk.Init(this);
 				if (Chunk.IsInVisibleDistance(FVector2D(Location.X, Location.Y), ViewDistance)) {
 					Mesh->SetMeshSectionVisible(Chunk.GetSectionIndex(), true);
+					Mesh->SetMaterial(Chunk.GetSectionIndex(), Material);
 					ChunksVisibleLastFrame.Add(CurrentChunkCoord);
 				}
 				TerrainMap.Add(CurrentChunkCoord, std::move(Chunk));
@@ -190,5 +189,5 @@ void AEndlessTerrain::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//UpdateVisibleChunks();
+	UpdateVisibleChunks();
 }
