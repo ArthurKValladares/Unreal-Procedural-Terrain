@@ -76,3 +76,6 @@ DerivedDataCache/*
 
 # Windows folder
 Windows/
+
+#Ignoring basically all non-code content for this repo
+Content/
