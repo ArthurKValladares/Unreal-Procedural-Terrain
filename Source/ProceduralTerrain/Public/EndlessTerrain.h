@@ -27,7 +27,7 @@ private:
 	// Mesh Data
 	TArray<FVector> Vertices;
 	TArray<FVector2D> Uv0;
-	TArray<int32> Triangles;
+	TMap<EMapLod, TArray<int32>> TriangleMap;
 };
 
 UCLASS()

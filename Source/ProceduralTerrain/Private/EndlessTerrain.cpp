@@ -50,45 +50,53 @@ void FTerrainChunk::Init(AEndlessTerrain* ParentTerrain) {
 
 void FTerrainChunk::SetLod(AEndlessTerrain* ParentTerrain, EMapLod Lod) {
 	MapLod = Lod;
-	Triangles.Empty();
+	TArray<int32>* LodTriangles = TriangleMap.Find(Lod);
+	if (LodTriangles != nullptr) {
+		ParentTerrain->GetMesh()->CreateMeshSection_LinearColor(SectionIndex, Vertices, *LodTriangles, {}, Uv0, {}, {}, false);
+	}
+	else {
+		TArray<int32> Triangles;
 
-	const int Width = AEndlessTerrain::VerticesInChunk;
-	const int Height = AEndlessTerrain::VerticesInChunk;
+		const int Width = AEndlessTerrain::VerticesInChunk;
+		const int Height = AEndlessTerrain::VerticesInChunk;
 
-	const int StepSize = static_cast<int>(MapLod);
-	const int XStepOffset = StepSize;
-	const int YStepOffset = Width * StepSize;
+		const int StepSize = static_cast<int>(MapLod);
+		const int XStepOffset = StepSize;
+		const int YStepOffset = Width * StepSize;
 
-	for (int Y = 0; Y < Height; Y += StepSize) {
-		for (int X = 0; X < Width; X += StepSize) {
-			if (Y < (Height - StepSize) && X < (Width - StepSize)) {
-				const int CurrentIndex = Y * Width + X;
-				// Vertex setup
-				//   0      1      2      3    ..    W-1
-				// (0+W)  (1+W)  (2+W)  (3+W)  .. (2W - 1)
-				// ...
+		for (int Y = 0; Y < Height; Y += StepSize) {
+			for (int X = 0; X < Width; X += StepSize) {
+				if (Y < (Height - StepSize) && X < (Width - StepSize)) {
+					const int CurrentIndex = Y * Width + X;
+					// Vertex setup
+					//   0      1      2      3    ..    W-1
+					// (0+W)  (1+W)  (2+W)  (3+W)  .. (2W - 1)
+					// ...
 
-				// Both triangles need to have counter-clockwise winding-order
-				//     X
-				//     |\
-				//     | \
-				// X+W --- x+W+1
-				Triangles.Add(CurrentIndex);
-				Triangles.Add(CurrentIndex + YStepOffset);
-				Triangles.Add(CurrentIndex + YStepOffset + XStepOffset);
+					// Both triangles need to have counter-clockwise winding-order
+					//     X
+					//     |\
+					//     | \
+					// X+W --- x+W+1
+					Triangles.Add(CurrentIndex);
+					Triangles.Add(CurrentIndex + YStepOffset);
+					Triangles.Add(CurrentIndex + YStepOffset + XStepOffset);
 
-				// X --- X+1    
-				//   \ |
-				//    \|
-				//     X+W+1
-				Triangles.Add(CurrentIndex);
-				Triangles.Add(CurrentIndex + YStepOffset + XStepOffset);
-				Triangles.Add(CurrentIndex + XStepOffset);
+					// X --- X+1    
+					//   \ |
+					//    \|
+					//     X+W+1
+					Triangles.Add(CurrentIndex);
+					Triangles.Add(CurrentIndex + YStepOffset + XStepOffset);
+					Triangles.Add(CurrentIndex + XStepOffset);
+				}
 			}
 		}
-	}
 
-	ParentTerrain->GetMesh()->CreateMeshSection_LinearColor(SectionIndex, Vertices, Triangles, {}, Uv0, {}, {}, false);
+		ParentTerrain->GetMesh()->CreateMeshSection_LinearColor(SectionIndex, Vertices, Triangles, {}, Uv0, {}, {}, false);
+
+		TriangleMap.Add(Lod, std::move(Triangles));
+	}
 }
 
 bool FTerrainChunk::IsInVisibleDistance(FVector2D SourceLocation, float ViewDistance) const {
