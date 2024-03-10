@@ -165,6 +165,7 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 	ChunksVisibleLastFrame.Empty();
 
 	// Test Chunks around Player Location
+	TArray<FIntPoint> NewChunksThisFrame;
 	const FIntPoint OriginChunkCoord = FIntPoint(FGenericPlatformMath::RoundToInt(Location.X / ChunkSize()), FGenericPlatformMath::RoundToInt(Location.Y / ChunkSize()));
 	const int ChunksInViewDistance = NumChunksInViewDistance();
 	for (int YOffset = -ChunksInViewDistance; YOffset <= ChunksInViewDistance; ++YOffset) {
@@ -188,18 +189,23 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 			}
 			else {
 				FTerrainChunk Chunk(this, CurrentChunkCoord, ChunkSize());
-				// TODO: This init will need to be done in some sort of async block
-				Chunk.Init(this);
 				Mesh->SetMaterial(Chunk.GetSectionIndex(), Material);
-				if (Chunk.IsInVisibleDistance(Location2D, ViewDistance)) {
-					Chunk.SetLod(this, Lod);
+				if (Chunk.IsInVisibleDistance(Location2D, ViewDistance)) {					
 					if (!Mesh->IsVisible()) {
 						Mesh->SetMeshSectionVisible(Chunk.GetSectionIndex(), true);
 					}
 					ChunksVisibleLastFrame.Add(CurrentChunkCoord);
 				}
 				TerrainMap.Add(CurrentChunkCoord, std::move(Chunk));
+				NewChunksThisFrame.Add(CurrentChunkCoord);
 			}
+		}
+
+		// TODO: Do this Async
+		for (const FIntPoint& ChunkCoord : NewChunksThisFrame) {
+			FTerrainChunk& ChunkRef = TerrainMap[ChunkCoord];
+			ChunkRef.Init(this);
+			ChunkRef.SetLod(this, EMapLod::One);
 		}
 	}
 }
