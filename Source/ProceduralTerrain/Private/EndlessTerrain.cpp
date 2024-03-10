@@ -49,6 +49,8 @@ void FTerrainChunk::Init(AEndlessTerrain* ParentTerrain) {
 }
 
 void FTerrainChunk::SetLod(AEndlessTerrain* ParentTerrain, EMapLod Lod) {
+	if (MapLod == Lod) return;
+
 	MapLod = Lod;
 	TArray<int32>* LodTriangles = ParentTerrain->TriangleMap.Find(Lod);
 	if (LodTriangles != nullptr) {
@@ -143,12 +145,6 @@ int AEndlessTerrain::CurrSectionIndex() const {
 }
 
 void AEndlessTerrain::UpdateVisibleChunks() {
-	for (const FIntPoint& ChunkCoord : ChunksVisibleLastFrame) {
-		const FTerrainChunk& ChunkRef = TerrainMap[ChunkCoord];
-		Mesh->SetMeshSectionVisible(ChunkRef.GetSectionIndex(), false);
-	}
-	ChunksVisibleLastFrame.Empty();
-
 	const auto* Player = GetWorld()->GetFirstPlayerController();
 	FVector Location;
 	if (Player) {
@@ -157,11 +153,20 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 	else {
 		Location = FVector(0.);
 	}
+	const FVector2D Location2D = FVector2D(Location.X, Location.Y);
 
+	// Update Chunks visible last frame
+	for (const FIntPoint& ChunkCoord : ChunksVisibleLastFrame) {
+		const FTerrainChunk& ChunkRef = TerrainMap[ChunkCoord];
+		if (!ChunkRef.IsInVisibleDistance(Location2D, ViewDistance)) {
+			Mesh->SetMeshSectionVisible(ChunkRef.GetSectionIndex(), false);
+		}
+	}
+	ChunksVisibleLastFrame.Empty();
+
+	// Test Chunks around Player Location
 	const FIntPoint OriginChunkCoord = FIntPoint(FGenericPlatformMath::RoundToInt(Location.X / ChunkSize()), FGenericPlatformMath::RoundToInt(Location.Y / ChunkSize()));
-
 	const int ChunksInViewDistance = NumChunksInViewDistance();
-
 	for (int YOffset = -ChunksInViewDistance; YOffset <= ChunksInViewDistance; ++YOffset) {
 		for (int XOffset = -ChunksInViewDistance; XOffset <= ChunksInViewDistance; ++XOffset) {
 			const FIntPoint CurrentChunkOffset = FIntPoint(XOffset, YOffset);
@@ -173,21 +178,24 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 			if (TerrainMap.Contains(CurrentChunkCoord)) {
 				FTerrainChunk& Chunk = TerrainMap[CurrentChunkCoord];
 				// TODO: Redeuce duplication below
-				if (Chunk.IsInVisibleDistance(FVector2D(Location.X, Location.Y), ViewDistance)) {
+				if (Chunk.IsInVisibleDistance(Location2D, ViewDistance)) {
 					Chunk.SetLod(this, Lod);
-					Mesh->SetMeshSectionVisible(Chunk.GetSectionIndex(), true);
+					if (!Mesh->IsVisible()) {
+						Mesh->SetMeshSectionVisible(Chunk.GetSectionIndex(), true);
+					}
 					ChunksVisibleLastFrame.Add(CurrentChunkCoord);
 				}
 			}
 			else {
 				FTerrainChunk Chunk(this, CurrentChunkCoord, ChunkSize());
 				// TODO: This init will need to be done in some sort of async block
-				// TODO: Can probably only create the vertices once (in Init), then just pass in the correct indices?
 				Chunk.Init(this);
-				Chunk.SetLod(this, Lod);
 				Mesh->SetMaterial(Chunk.GetSectionIndex(), Material);
-				if (Chunk.IsInVisibleDistance(FVector2D(Location.X, Location.Y), ViewDistance)) {					
-					Mesh->SetMeshSectionVisible(Chunk.GetSectionIndex(), true);
+				if (Chunk.IsInVisibleDistance(Location2D, ViewDistance)) {
+					Chunk.SetLod(this, Lod);
+					if (!Mesh->IsVisible()) {
+						Mesh->SetMeshSectionVisible(Chunk.GetSectionIndex(), true);
+					}
 					ChunksVisibleLastFrame.Add(CurrentChunkCoord);
 				}
 				TerrainMap.Add(CurrentChunkCoord, std::move(Chunk));
