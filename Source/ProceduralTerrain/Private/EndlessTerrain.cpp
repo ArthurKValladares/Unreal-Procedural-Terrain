@@ -15,13 +15,6 @@ FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint ChunkCoor
 
 void FTerrainChunk::Init(AEndlessTerrain* ParentTerrain) {
 	Noise.Init(ENormalizeMode::Global, ParentTerrain->RandomSeed, ParentTerrain->VerticesInChunk, ParentTerrain->VerticesInChunk, ParentTerrain->Scale, ParentTerrain->Octaves, ParentTerrain->Persistance, ParentTerrain->Lacunarity, ChunkCoord * (ParentTerrain->VerticesInChunk - 1));
-}
-
-void FTerrainChunk::SetLod(AEndlessTerrain* ParentTerrain, EMapLod Lod) {
-	MapLod = Lod;
-	Triangles.Empty();
-	Vertices.Empty();
-	Uv0.Empty();
 
 	const FVector2D Center = Rect.GetCenter();
 	const float HalfSize = Rect.GetSize().X / 2.;
@@ -31,19 +24,11 @@ void FTerrainChunk::SetLod(AEndlessTerrain* ParentTerrain, EMapLod Lod) {
 	const float YOffset = -HalfSize;
 	const float ZOffset = 0.0;
 
-	const int StepSize = static_cast<int>(MapLod);
 	const int Width = AEndlessTerrain::VerticesInChunk;
 	const int Height = AEndlessTerrain::VerticesInChunk;
 
-	const int VerticesPerRow = (Width - 1) / StepSize + 1;
-	const int NumIndices = (VerticesPerRow - 1) * (VerticesPerRow - 1) * 6;
-
-	for (int Y = 0; Y < Height; Y += StepSize) {
-		const int YSteps = Y / StepSize;
-		const int YIndexOffset = YSteps * VerticesPerRow;
-		for (int X = 0; X < Width; X += StepSize) {
-			const int XSteps = X / StepSize;
-
+	for (int Y = 0; Y < Height; ++Y) {
+		for (int X = 0; X < Width; ++X) {
 			// TODO: Duplicated code here, think about it soon, maybe save normalized noise instead of absolute
 			const int NoiseIndex = Y * Width + X;
 			const float NoiseValue = Noise.NoiseValues[NoiseIndex];
@@ -59,9 +44,25 @@ void FTerrainChunk::SetLod(AEndlessTerrain* ParentTerrain, EMapLod Lod) {
 			const float U = (float)X / Width;
 			const float V = (float)Y / Width;
 			Uv0.Add(FVector2D(U, V));
+		}
+	}
+}
 
-			if (Y < (Height - 1) && X < (Width - 1)) {
-				const int CurrentIndex = YIndexOffset + XSteps;
+void FTerrainChunk::SetLod(AEndlessTerrain* ParentTerrain, EMapLod Lod) {
+	MapLod = Lod;
+	Triangles.Empty();
+
+	const int Width = AEndlessTerrain::VerticesInChunk;
+	const int Height = AEndlessTerrain::VerticesInChunk;
+
+	const int StepSize = static_cast<int>(MapLod);
+	const int XStepOffset = StepSize;
+	const int YStepOffset = Width * StepSize;
+
+	for (int Y = 0; Y < Height; Y += StepSize) {
+		for (int X = 0; X < Width; X += StepSize) {
+			if (Y < (Height - StepSize) && X < (Width - StepSize)) {
+				const int CurrentIndex = Y * Width + X;
 				// Vertex setup
 				//   0      1      2      3    ..    W-1
 				// (0+W)  (1+W)  (2+W)  (3+W)  .. (2W - 1)
@@ -73,20 +74,19 @@ void FTerrainChunk::SetLod(AEndlessTerrain* ParentTerrain, EMapLod Lod) {
 				//     | \
 				// X+W --- x+W+1
 				Triangles.Add(CurrentIndex);
-				Triangles.Add(CurrentIndex + VerticesPerRow);
-				Triangles.Add(CurrentIndex + VerticesPerRow + 1);
+				Triangles.Add(CurrentIndex + YStepOffset);
+				Triangles.Add(CurrentIndex + YStepOffset + XStepOffset);
 
 				// X --- X+1    
 				//   \ |
 				//    \|
 				//     X+W+1
 				Triangles.Add(CurrentIndex);
-				Triangles.Add(CurrentIndex + VerticesPerRow + 1);
-				Triangles.Add(CurrentIndex + 1);
+				Triangles.Add(CurrentIndex + YStepOffset + XStepOffset);
+				Triangles.Add(CurrentIndex + XStepOffset);
 			}
 		}
 	}
-	check(Triangles.Num() == NumIndices);
 
 	ParentTerrain->GetMesh()->CreateMeshSection_LinearColor(SectionIndex, Vertices, Triangles, {}, Uv0, {}, {}, false);
 }
