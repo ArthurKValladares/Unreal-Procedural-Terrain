@@ -27,7 +27,6 @@ private:
 	// Mesh Data
 	TArray<FVector> Vertices;
 	TArray<FVector2D> Uv0;
-	TMap<EMapLod, TArray<int32>> TriangleMap;
 };
 
 UCLASS()
@@ -72,6 +71,8 @@ class PROCEDURALTERRAIN_API AEndlessTerrain : public AActor
 
 	TMap<FIntPoint, FTerrainChunk> TerrainMap;
 	TArray<FIntPoint> ChunksVisibleLastFrame;
+
+	TMap<EMapLod, TArray<int32>> TriangleMap;
 
 	int NumChunksInViewDistance() const;
 

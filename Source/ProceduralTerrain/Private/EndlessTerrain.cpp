@@ -50,7 +50,7 @@ void FTerrainChunk::Init(AEndlessTerrain* ParentTerrain) {
 
 void FTerrainChunk::SetLod(AEndlessTerrain* ParentTerrain, EMapLod Lod) {
 	MapLod = Lod;
-	TArray<int32>* LodTriangles = TriangleMap.Find(Lod);
+	TArray<int32>* LodTriangles = ParentTerrain->TriangleMap.Find(Lod);
 	if (LodTriangles != nullptr) {
 		ParentTerrain->GetMesh()->CreateMeshSection_LinearColor(SectionIndex, Vertices, *LodTriangles, {}, Uv0, {}, {}, false);
 	}
@@ -95,7 +95,7 @@ void FTerrainChunk::SetLod(AEndlessTerrain* ParentTerrain, EMapLod Lod) {
 
 		ParentTerrain->GetMesh()->CreateMeshSection_LinearColor(SectionIndex, Vertices, Triangles, {}, Uv0, {}, {}, false);
 
-		TriangleMap.Add(Lod, std::move(Triangles));
+		ParentTerrain->TriangleMap.Add(Lod, std::move(Triangles));
 	}
 }
 
