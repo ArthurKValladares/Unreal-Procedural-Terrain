@@ -168,6 +168,7 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 	ChunksVisibleLastFrame.Empty();
 
 	// Test Chunks around Player Location
+	TArray<FIntPoint> NewChunksThisFrame;
 	const FIntPoint OriginChunkCoord = FIntPoint(FGenericPlatformMath::RoundToInt(Location.X / ChunkSize()), FGenericPlatformMath::RoundToInt(Location.Y / ChunkSize()));
 	const int ChunksInViewDistance = NumChunksInViewDistance();
 	for (int YOffset = -ChunksInViewDistance; YOffset <= ChunksInViewDistance; ++YOffset) {
@@ -200,16 +201,19 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 					ChunksVisibleLastFrame.Add(CurrentChunkCoord);
 				}
 				TerrainMap.Add(CurrentChunkCoord, std::move(Chunk));
-
-				// TODO: Fix bad async code
-				AsyncTask(ENamedThreads::AnyHiPriThreadNormalTask, [CurrentChunkCoord, this]() {
-					UE_LOG(LogTemp, Display, TEXT("Initting Chunk: (%d, %d)"), CurrentChunkCoord.X, CurrentChunkCoord.Y);
-					FTerrainChunk& ChunkRef = TerrainMap[CurrentChunkCoord];
-					ChunkRef.Init(this);
-					ChunkRef.SetLod(this, EMapLod::One);
-				});
+				NewChunksThisFrame.Add(CurrentChunkCoord);
 			}
 		}
+	}
+
+	for (int I = 0; I < NewChunksThisFrame.Num(); ++I) {
+		const FIntPoint ChunkCoord = NewChunksThisFrame[I];
+		AsyncTask(ENamedThreads::AnyHiPriThreadNormalTask, [ChunkCoord, this]() {
+			UE_LOG(LogTemp, Display, TEXT("Initting Chunk: (%d, %d)"), ChunkCoord.X, ChunkCoord.Y);
+			FTerrainChunk& ChunkRef = TerrainMap[ChunkCoord];
+			ChunkRef.Init(this);
+			ChunkRef.SetLod(this, EMapLod::One);
+		});
 	}
 }
 
