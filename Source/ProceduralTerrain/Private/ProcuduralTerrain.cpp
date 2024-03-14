@@ -174,7 +174,3 @@ void AProcuduralTerrain::UpdateTexture() {
 	ImageData->Unlock();
 	Texture->UpdateResource();
 }
-
-void AProcuduralTerrain::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) {
-	Super::PostEditChangeProperty(PropertyChangedEvent);
-}

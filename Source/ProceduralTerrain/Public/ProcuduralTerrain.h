@@ -131,8 +131,6 @@ class PROCEDURALTERRAIN_API AProcuduralTerrain : public AActor
 	// TODO: Will use multiple textures
 	UTexture2D* Texture;
 
-	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent);
-
 	void CreateMesh();
 	void UpdateTexture();
 public:	
