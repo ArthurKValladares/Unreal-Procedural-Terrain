@@ -55,6 +55,7 @@ class PROCEDURALTERRAIN_API AEndlessTerrain : public AActor
 	UPROPERTY(EditAnywhere)
 	float ViewDistance;
 
+	FCriticalSection MeshMutex;
 	UPROPERTY(VisibleAnywhere)
 	UProceduralMeshComponent* Mesh;
 	UPROPERTY(EditAnywhere)

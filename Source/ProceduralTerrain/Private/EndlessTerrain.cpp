@@ -54,7 +54,9 @@ void FTerrainChunk::SetLod(AEndlessTerrain* ParentTerrain, EMapLod Lod) {
 	MapLod = Lod;
 	TArray<int32>* LodTriangles = ParentTerrain->TriangleMap.Find(Lod);
 	if (LodTriangles != nullptr) {
+		ParentTerrain->MeshMutex.Lock();
 		ParentTerrain->GetMesh()->CreateMeshSection_LinearColor(SectionIndex, Vertices, *LodTriangles, {}, Uv0, {}, {}, false);
+		ParentTerrain->MeshMutex.Unlock();
 	}
 	else {
 		TArray<int32> Triangles;
@@ -95,9 +97,10 @@ void FTerrainChunk::SetLod(AEndlessTerrain* ParentTerrain, EMapLod Lod) {
 			}
 		}
 
+		ParentTerrain->MeshMutex.Lock();
 		ParentTerrain->GetMesh()->CreateMeshSection_LinearColor(SectionIndex, Vertices, Triangles, {}, Uv0, {}, {}, false);
-
 		ParentTerrain->TriangleMap.Add(Lod, std::move(Triangles));
+		ParentTerrain->MeshMutex.Unlock();
 	}
 }
 
@@ -133,7 +136,7 @@ AEndlessTerrain::~AEndlessTerrain()
 
 void AEndlessTerrain::OnConstruction(const FTransform& Transform) {
 	Super::OnConstruction(Transform);
-	UpdateVisibleChunks();
+	//UpdateVisibleChunks();
 }
 
 int AEndlessTerrain::NumChunksInViewDistance() const {
