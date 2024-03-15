@@ -27,6 +27,7 @@ private:
 	// Mesh Data
 	TArray<FVector> Vertices;
 	TArray<FVector2D> Uv0;
+	TMap <EMapLod, TArray<FVector>> NormalsMap;
 };
 
 UCLASS()

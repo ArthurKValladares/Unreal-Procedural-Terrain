@@ -51,11 +51,48 @@ void FTerrainChunk::Init(AEndlessTerrain* ParentTerrain) {
 void FTerrainChunk::SetLod(AEndlessTerrain* ParentTerrain, EMapLod Lod) {
 	if (MapLod == Lod) return;
 
+	const auto GetNormal = [&](int32 VertexIndex0, int32 VertexIndex1, int32 VertexIndex2) {
+		const FVector Vertex0 = Vertices[VertexIndex0];
+		const FVector Vertex1 = Vertices[VertexIndex1];
+		const FVector Vertex2 = Vertices[VertexIndex2];
+
+		const FVector Vertex01 = Vertex1 - Vertex0;
+		const FVector Vertex02 = Vertex2 - Vertex0;
+		return FVector::CrossProduct(Vertex01, Vertex02).GetUnsafeNormal();
+	};
+
+	const auto GetNormals = [&](const TArray<int32>& Triangles) {
+		TArray<FVector> Normals;
+		Normals.SetNumZeroed(Vertices.Num());
+		for (int I = 0; I < Triangles.Num(); I += 3) {
+			const int32 VertexIndex0 = Triangles[I];
+			const int32 VertexIndex1 = Triangles[I + 1];
+			const int32 VertexIndex2 = Triangles[I + 2];
+
+			const FVector Normal = GetNormal(VertexIndex0, VertexIndex1, VertexIndex2);
+
+			Normals[VertexIndex0] += Normal;
+			Normals[VertexIndex1] += Normal;
+			Normals[VertexIndex2] += Normal;
+		}
+		for (int I = 0; I < Normals.Num(); ++I) {
+			Normals[I] = Normals[I].GetUnsafeNormal();
+		}
+		return Normals;
+	};
+
 	MapLod = Lod;
 	TArray<int32>* LodTriangles = ParentTerrain->TriangleMap.Find(Lod);
+	TArray<FVector>* LodNormals = NormalsMap.Find(Lod);
 	if (LodTriangles != nullptr) {
+		if (LodNormals == nullptr) {
+			TArray<FVector> Normals = GetNormals(*LodTriangles);
+			NormalsMap.Add(Lod, std::move(Normals));
+			LodNormals = NormalsMap.Find(Lod);
+		}
+
 		ParentTerrain->MeshMutex.Lock();
-		ParentTerrain->GetMesh()->CreateMeshSection_LinearColor(SectionIndex, Vertices, *LodTriangles, {}, Uv0, {}, {}, false);
+		ParentTerrain->GetMesh()->CreateMeshSection_LinearColor(SectionIndex, Vertices, *LodTriangles, *LodNormals, Uv0, {}, {}, false);
 		ParentTerrain->MeshMutex.Unlock();
 	}
 	else {
@@ -97,9 +134,11 @@ void FTerrainChunk::SetLod(AEndlessTerrain* ParentTerrain, EMapLod Lod) {
 			}
 		}
 
+		TArray<FVector> Normals = GetNormals(Triangles);
 		ParentTerrain->MeshMutex.Lock();
-		ParentTerrain->GetMesh()->CreateMeshSection_LinearColor(SectionIndex, Vertices, Triangles, {}, Uv0, {}, {}, false);
+		ParentTerrain->GetMesh()->CreateMeshSection_LinearColor(SectionIndex, Vertices, Triangles, Normals, Uv0, {}, {}, false);
 		ParentTerrain->TriangleMap.Add(Lod, std::move(Triangles));
+		NormalsMap.Add(Lod, std::move(Normals));
 		ParentTerrain->MeshMutex.Unlock();
 	}
 }
