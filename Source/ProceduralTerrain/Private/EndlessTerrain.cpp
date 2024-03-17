@@ -11,6 +11,17 @@ FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint ChunkCoor
 
 	Rect = FBox2D(Center - HalfSize, Center + HalfSize);
 	SectionIndex = ParentTerrain->CurrSectionIndex();
+
+	const int TextureSize = AEndlessTerrain::VerticesInChunk - 1;
+	Texture = UTexture2D::CreateTransient(TextureSize, TextureSize, PF_B8G8R8A8, "NoiseTexture");
+	Texture->Filter = TextureFilter::TF_Nearest;
+	Texture->AddressX = TextureAddress::TA_Clamp;
+	Texture->AddressY = TextureAddress::TA_Clamp;
+
+	MaterialInstance = UMaterialInstanceDynamic::Create(ParentTerrain->Material, ParentTerrain->Mesh);
+	check(MaterialInstance);
+	MaterialInstance->SetTextureParameterValue("NoiseTexture", Texture);
+	ParentTerrain->Mesh->SetMaterial(SectionIndex, MaterialInstance);
 }
 
 void FTerrainChunk::Init(AEndlessTerrain* ParentTerrain) {

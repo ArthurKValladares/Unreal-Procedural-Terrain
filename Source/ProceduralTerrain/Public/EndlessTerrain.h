@@ -21,8 +21,11 @@ private:
 	FIntPoint ChunkCoord;
 	FBox2D Rect;
 	int SectionIndex;
+
 	NoiseMap Noise;
-	// TODO: Will need an `update` function later
+
+	UMaterialInstanceDynamic* MaterialInstance;
+	UTexture2D* Texture;
 
 	// Mesh Data
 	TArray<FVector> Vertices;
