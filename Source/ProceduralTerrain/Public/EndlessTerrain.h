@@ -17,6 +17,8 @@ struct FTerrainChunk {
 		return SectionIndex;
 	}
 private:
+	void UpdateTexture(AEndlessTerrain* ParentTerrain);
+
 	EMapLod MapLod;
 	FIntPoint ChunkCoord;
 	FBox2D Rect;
@@ -65,6 +67,8 @@ class PROCEDURALTERRAIN_API AEndlessTerrain : public AActor
 	UPROPERTY(EditAnywhere)
 	UMaterial* Material;
 
+	UPROPERTY(EditAnywhere)
+	TArray<FTerrainParams> TerrainParams;
 	UPROPERTY(EditAnywhere)
 	float ElevationMultiplier;
 	UPROPERTY(EditAnywhere)

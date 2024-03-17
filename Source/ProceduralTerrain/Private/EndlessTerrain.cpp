@@ -12,8 +12,9 @@ FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint ChunkCoor
 	Rect = FBox2D(Center - HalfSize, Center + HalfSize);
 	SectionIndex = ParentTerrain->CurrSectionIndex();
 
+	const FName TextureName = FName(TEXT("NoiseTexture%d"), SectionIndex);
 	const int TextureSize = AEndlessTerrain::VerticesInChunk - 1;
-	Texture = UTexture2D::CreateTransient(TextureSize, TextureSize, PF_B8G8R8A8, "NoiseTexture");
+	Texture = UTexture2D::CreateTransient(TextureSize, TextureSize, PF_B8G8R8A8, TextureName);
 	Texture->Filter = TextureFilter::TF_Nearest;
 	Texture->AddressX = TextureAddress::TA_Clamp;
 	Texture->AddressY = TextureAddress::TA_Clamp;
@@ -26,6 +27,7 @@ FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint ChunkCoor
 
 void FTerrainChunk::Init(AEndlessTerrain* ParentTerrain) {
 	Noise.Init(ENormalizeMode::Global, ParentTerrain->RandomSeed, ParentTerrain->VerticesInChunk, ParentTerrain->VerticesInChunk, ParentTerrain->Scale, ParentTerrain->Octaves, ParentTerrain->Persistance, ParentTerrain->Lacunarity, ChunkCoord * (ParentTerrain->VerticesInChunk - 1));
+	//UpdateTexture(ParentTerrain);
 
 	const FVector2D Center = Rect.GetCenter();
 	const float HalfSize = Rect.GetSize().X / 2.;
@@ -159,6 +161,38 @@ bool FTerrainChunk::IsInVisibleDistance(FVector2D SourceLocation, float ViewDist
 	return Distance <= ViewDistance;
 }
 
+void FTerrainChunk::UpdateTexture(AEndlessTerrain* ParentTerrain) {
+	const int Width = AEndlessTerrain::VerticesInChunk - 1;
+	const int Height = AEndlessTerrain::VerticesInChunk - 1;
+
+	FTexture2DMipMap* MipMap = &Texture->GetPlatformData()->Mips[0];
+	FByteBulkData* ImageData = &MipMap->BulkData;
+	uint8* RawImageData = (uint8*)ImageData->Lock(LOCK_READ_WRITE);
+	const int PixelSize = 4;
+	for (int Y = 0; Y < Height; ++Y) {
+		for (int X = 0; X < Width; ++X) {
+			const int NoiseIndex = Y * Width + X;
+			const float NoiseValue = Noise.NoiseValues[NoiseIndex];
+
+			const int TextureIndex = NoiseIndex * PixelSize;
+
+			for (const FTerrainParams& Param : ParentTerrain->TerrainParams) {
+				if (NoiseValue <= Param.MaxHeight) {
+					const FColor Color = Param.Color;
+
+					RawImageData[TextureIndex] = Color.B;
+					RawImageData[TextureIndex + 1] = Color.G;
+					RawImageData[TextureIndex + 2] = Color.R;
+					RawImageData[TextureIndex + 3] = 255;
+					break;
+				}
+			}
+		}
+	}
+	ImageData->Unlock();
+	Texture->UpdateResource();
+}
+
 AEndlessTerrain::AEndlessTerrain()
 	: Scale(60.)
 	, Octaves(1)
@@ -167,6 +201,7 @@ AEndlessTerrain::AEndlessTerrain()
 	, ViewDistance(1000.0)
 	, Mesh(CreateDefaultSubobject<UProceduralMeshComponent>("EndlessMesh"))
 	, Material(CreateDefaultSubobject<UMaterial>("EndlessMaterial"))
+	, TerrainParams(FTerrainParams::GetParams())
 	, ElevationMultiplier(AEndlessTerrain::VerticesInChunk / 2.)
 	, ElevationCurve(CreateDefaultSubobject<UCurveFloat>("ElevationCurve"))
 	, RandomSeed(0)
