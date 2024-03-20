@@ -32,7 +32,7 @@ void AProcuduralTerrain::OnConstruction(const FTransform& Transform) {
 	const int Height = ChunkSize;
 	check((Width - 1) % static_cast<int>(MapLod) == 0);
 
-	//Noise.Init(RandomSeed, Width, Height, Scale, Octaves, Persistance, Lacunarity, NoiseOffset);
+	Noise.Init(ENormalizeMode::Local, 0, Width, Height, Scale, Octaves, Persistance, Lacunarity, FVector2D(0, 0));
 
 	Texture = UTexture2D::CreateTransient(Width, Height, PF_B8G8R8A8, "Texture");
 	Texture->Filter = TextureFilter::TF_Nearest;
