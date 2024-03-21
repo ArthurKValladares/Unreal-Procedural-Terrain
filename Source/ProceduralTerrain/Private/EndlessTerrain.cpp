@@ -293,12 +293,12 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 
 	for (int I = 0; I < NewChunksThisFrame.Num(); ++I) {
 		const FIntPoint ChunkCoord = NewChunksThisFrame[I];
-		AsyncTask(ENamedThreads::AnyBackgroundHiPriTask, [ChunkCoord, this]() {
+		//AsyncTask(ENamedThreads::AnyBackgroundHiPriTask, [ChunkCoord, this]() {
 			UE_LOG(LogTemp, Display, TEXT("Initting Chunk: (%d, %d)"), ChunkCoord.X, ChunkCoord.Y);
 			FTerrainChunk& ChunkRef = TerrainMap[ChunkCoord];
 			ChunkRef.Init(this);
 			ChunkRef.SetLod(this, EMapLod::One);
-		});
+		//});
 	}
 }
 
