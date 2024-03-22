@@ -32,8 +32,8 @@ void NoiseMap::Init(ENormalizeMode NormalizeMode, int Seed, int W, int H, float 
 	TArray<FVector2D> OctaveOffsets;
 	OctaveOffsets.SetNum(Octaves);
 	for (int I = 0; I < Octaves; ++I) {
-		const float X = RandomStream.FRandRange(-100000, 100000) + NoiseOffset.X;
-		const float Y = RandomStream.FRandRange(-100000, 100000) + NoiseOffset.Y;
+		const float X = RandomStream.FRandRange(-100000, 100000);
+		const float Y = RandomStream.FRandRange(-100000, 100000);
 		OctaveOffsets[I] = FVector2D(X, Y);
 
 		MaxPossibleHeight += Amplitude;
@@ -51,8 +51,8 @@ void NoiseMap::Init(ENormalizeMode NormalizeMode, int Seed, int W, int H, float 
 			float NoiseHeight = 0.;
 
 			for (int I = 0; I < Octaves; ++I) {
-				const float SampleX = (X + OctaveOffsets[I].X) / Scale * Frequency;
-				const float SampleY = (Y + OctaveOffsets[I].Y) / Scale * Frequency;
+				const float SampleX = (X + OctaveOffsets[I].X + NoiseOffset.X) / Scale * Frequency;
+				const float SampleY = (Y + OctaveOffsets[I].Y + NoiseOffset.Y) / Scale * Frequency;
 
 				const float Noise = Perlin2D(SampleX, SampleY) * 2. - 1.;
 				NoiseHeight += Noise * Amplitude;

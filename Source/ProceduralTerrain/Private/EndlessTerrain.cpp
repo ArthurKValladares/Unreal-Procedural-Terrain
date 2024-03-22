@@ -121,8 +121,8 @@ bool FTerrainChunk::IsInVisibleDistance(FVector2D SourceLocation, float ViewDist
 }
 
 void FTerrainChunk::UpdateTexture(AEndlessTerrain* ParentTerrain) {
-	const int Width = AEndlessTerrain::VerticesInChunk - 1;
-	const int Height = AEndlessTerrain::VerticesInChunk - 1;
+	const int Width = AEndlessTerrain::VerticesInChunk;
+	const int Height = AEndlessTerrain::VerticesInChunk;
 
 	FTexture2DMipMap* MipMap = &Texture->GetPlatformData()->Mips[0];
 	FByteBulkData* ImageData = &MipMap->BulkData;
@@ -147,7 +147,7 @@ void FTerrainChunk::UpdateTexture(AEndlessTerrain* ParentTerrain) {
 				}
 			}
 #if DEBUG_DRAW
-			if (X == 0 || X == Width - 1 || Y == 0 || Y == Height -1) {
+			if (X == 0 || X == (Width - 1) || Y == 0 || Y == (Height - 1)) {
 				RawImageData[TextureIndex] = 0;
 				RawImageData[TextureIndex + 1] = 0;
 				RawImageData[TextureIndex + 2] = 255;
