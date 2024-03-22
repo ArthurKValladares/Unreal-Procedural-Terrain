@@ -17,17 +17,17 @@ FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint ChunkCoor
 	Noise.Init(
 		ENormalizeMode::Global, 
 		ParentTerrain->RandomSeed, 
-		ParentTerrain->VerticesInChunk, 
-		ParentTerrain->VerticesInChunk, 
+		AEndlessTerrain::VerticesInChunk,
+		AEndlessTerrain::VerticesInChunk,
 		ParentTerrain->Scale, 
 		ParentTerrain->Octaves, 
 		ParentTerrain->Persistance, 
 		ParentTerrain->Lacunarity, 
-		ChunkCoord * (ParentTerrain->VerticesInChunk - 1)
+		ChunkCoord * (AEndlessTerrain::VerticesInChunk)
 	);
 
 	const FName TextureName = FName(TEXT("NoiseTexture%d"), SectionIndex);
-	const int TextureSize = AEndlessTerrain::VerticesInChunk - 1;
+	const int TextureSize = AEndlessTerrain::VerticesInChunk;
 	Texture = UTexture2D::CreateTransient(TextureSize, TextureSize, PF_B8G8R8A8, TextureName);
 	Texture->Filter = TextureFilter::TF_Nearest;
 	Texture->AddressX = TextureAddress::TA_Clamp;
