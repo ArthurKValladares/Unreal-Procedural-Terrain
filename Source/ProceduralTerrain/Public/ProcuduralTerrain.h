@@ -47,7 +47,7 @@ struct FTerrainParams {
 		};
 		Params[4] = FTerrainParams{
 			ETerrainType::Snow,
-			1.0,
+			999.0,
 			FColor(255, 255, 255)
 		};
 		// TODO: Assert some params stuff later, like height is always increasing. On change too

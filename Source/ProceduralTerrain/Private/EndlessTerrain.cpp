@@ -2,6 +2,8 @@
 
 #include "EndlessTerrain.h"
 
+#define DEBUG_DRAW true
+
 FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint ChunkCoord, float  Size)
 	: MapLod(EMapLod::One)
 	, ChunkCoord(ChunkCoord)
@@ -12,7 +14,17 @@ FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint ChunkCoor
 	Rect = FBox2D(Center - HalfSize, Center + HalfSize);
 	SectionIndex = ParentTerrain->CurrSectionIndex();
 
-	Noise.Init(ENormalizeMode::Global, ParentTerrain->RandomSeed, ParentTerrain->VerticesInChunk, ParentTerrain->VerticesInChunk, ParentTerrain->Scale, ParentTerrain->Octaves, ParentTerrain->Persistance, ParentTerrain->Lacunarity, ChunkCoord * (ParentTerrain->VerticesInChunk - 1));
+	Noise.Init(
+		ENormalizeMode::Global, 
+		ParentTerrain->RandomSeed, 
+		ParentTerrain->VerticesInChunk, 
+		ParentTerrain->VerticesInChunk, 
+		ParentTerrain->Scale, 
+		ParentTerrain->Octaves, 
+		ParentTerrain->Persistance, 
+		ParentTerrain->Lacunarity, 
+		ChunkCoord * (ParentTerrain->VerticesInChunk - 1)
+	);
 
 	const FName TextureName = FName(TEXT("NoiseTexture%d"), SectionIndex);
 	const int TextureSize = AEndlessTerrain::VerticesInChunk - 1;
@@ -134,6 +146,14 @@ void FTerrainChunk::UpdateTexture(AEndlessTerrain* ParentTerrain) {
 					break;
 				}
 			}
+#if DEBUG_DRAW
+			if (X == 0 || X == Width - 1 || Y == 0 || Y == Height -1) {
+				RawImageData[TextureIndex] = 0;
+				RawImageData[TextureIndex + 1] = 0;
+				RawImageData[TextureIndex + 2] = 255;
+				RawImageData[TextureIndex + 3] = 255;
+			}
+#endif
 		}
 	}
 	ImageData->Unlock();
