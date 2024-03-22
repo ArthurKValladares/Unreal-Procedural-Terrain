@@ -7,8 +7,7 @@
 
 struct FTerrainChunk {
 	FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint ChunkCoord, float Size);
-	void Init(AEndlessTerrain* ParentTerrain);
-	void SetLod(AEndlessTerrain* ParentTerrain, EMapLod MapLod);
+	void CreateMesh(AEndlessTerrain* ParentTerrain);
 
 	// NOTE: 2D Ditance ignoring Z coordinate. think about it later
 	bool IsInVisibleDistance(FVector2D SourceLocation, float ViewDistance) const;
@@ -32,7 +31,6 @@ private:
 	// Mesh Data
 	TArray<FVector> Vertices;
 	TArray<FVector2D> Uv0;
-	TMap <EMapLod, TArray<FVector>> NormalsMap;
 };
 
 UCLASS()
@@ -79,9 +77,6 @@ class PROCEDURALTERRAIN_API AEndlessTerrain : public AActor
 	FRandomStream RandomStream;
 
 	TMap<FIntPoint, FTerrainChunk> TerrainMap;
-	TArray<FIntPoint> ChunksVisibleLastFrame;
-
-	TMap<EMapLod, TArray<int32>> TriangleMap;
 
 	int NumChunksInViewDistance() const;
 
@@ -96,12 +91,6 @@ public:
 	~AEndlessTerrain();
 
 	int CurrSectionIndex() const;
-	UProceduralMeshComponent* GetMesh() {
-		return Mesh;
-	}
-	UMaterial* GetMaterial() {
-		return Material;
-	}
 
 	virtual void Tick(float DeltaTime) override;
 };
