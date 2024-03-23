@@ -2,7 +2,7 @@
 
 #include "EndlessTerrain.h"
 
-#define DEBUG_DRAW true
+#define DEBUG_DRAW false
 
 FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint ChunkCoord, float  Size)
 	: MapLod(EMapLod::One)
@@ -169,7 +169,7 @@ AEndlessTerrain::AEndlessTerrain()
 	, Mesh(CreateDefaultSubobject<UProceduralMeshComponent>("EndlessMesh"))
 	, Material(CreateDefaultSubobject<UMaterial>("EndlessMaterial"))
 	, TerrainParams(FTerrainParams::GetParams())
-	, ElevationMultiplier(AEndlessTerrain::VerticesInChunk / 2.)
+	, ElevationMultiplier(AEndlessTerrain::VerticesInChunk / 1.25)
 	, ElevationCurve(CreateDefaultSubobject<UCurveFloat>("ElevationCurve"))
 	, RandomSeed(0)
 	, RandomStream(FRandomStream(RandomSeed))
@@ -249,6 +249,5 @@ void AEndlessTerrain::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// TODO: Not updating Chunks at tick time for now.
-	//UpdateVisibleChunks();
+	UpdateVisibleChunks();
 }

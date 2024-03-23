@@ -27,12 +27,12 @@ struct FTerrainParams {
 		Params.SetNum(static_cast<int>(ETerrainType::Count));
 		Params[0] = FTerrainParams{
 			ETerrainType::Water, 
-			0.4, 
+			0.1, 
 			FColor(0, 0, 255)
 		};
 		Params[1] = FTerrainParams{
 			ETerrainType::Sand,
-			0.5,
+			0.3,
 			FColor(255, 255, 0)
 		};
 		Params[2] = FTerrainParams{ 
