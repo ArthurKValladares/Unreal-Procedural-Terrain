@@ -9,9 +9,6 @@ struct FTerrainChunk {
 	FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint ChunkCoord, float Size);
 	void CreateMesh(AEndlessTerrain* ParentTerrain);
 
-	// NOTE: 2D Ditance ignoring Z coordinate. think about it later
-	bool IsInVisibleDistance(FVector2D SourceLocation, float ViewDistance) const;
-
 	int GetSectionIndex() const {
 		return SectionIndex;
 	}
@@ -57,7 +54,7 @@ class PROCEDURALTERRAIN_API AEndlessTerrain : public AActor
 	float Lacunarity;
 
 	UPROPERTY(EditAnywhere)
-	float ViewDistance;
+	int ChunksInViewDistance;
 
 	FCriticalSection MeshMutex;
 	UPROPERTY(VisibleAnywhere)
@@ -78,7 +75,7 @@ class PROCEDURALTERRAIN_API AEndlessTerrain : public AActor
 
 	TMap<FIntPoint, FTerrainChunk> TerrainMap;
 
-	int NumChunksInViewDistance() const;
+	TArray<FIntPoint> ChunksVisibleLastFrame;
 
 	void UpdateVisibleChunks();
 

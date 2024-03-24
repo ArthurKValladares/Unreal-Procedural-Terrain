@@ -115,11 +115,6 @@ void FTerrainChunk::CreateMesh(AEndlessTerrain* ParentTerrain) {
 	ParentTerrain->Mesh->CreateMeshSection_LinearColor(SectionIndex, Vertices, Triangles, {}, Uv0, {}, {}, false);
 }
 
-bool FTerrainChunk::IsInVisibleDistance(FVector2D SourceLocation, float ViewDistance) const {
-	const float Distance = FGenericPlatformMath::Sqrt(Rect.ComputeSquaredDistanceToPoint(SourceLocation));
-	return Distance <= ViewDistance;
-}
-
 void FTerrainChunk::UpdateTexture(AEndlessTerrain* ParentTerrain) {
 	const int Width = AEndlessTerrain::VerticesInChunk;
 	const int Height = AEndlessTerrain::VerticesInChunk;
@@ -165,7 +160,7 @@ AEndlessTerrain::AEndlessTerrain()
 	, Octaves(1)
 	, Persistance(0.5)
 	, Lacunarity(1.0)
-	, ViewDistance(1000.0)
+	, ChunksInViewDistance(2)
 	, Mesh(CreateDefaultSubobject<UProceduralMeshComponent>("EndlessMesh"))
 	, Material(CreateDefaultSubobject<UMaterial>("EndlessMaterial"))
 	, TerrainParams(FTerrainParams::GetParams())
@@ -191,10 +186,6 @@ void AEndlessTerrain::OnConstruction(const FTransform& Transform) {
 	UpdateVisibleChunks();
 }
 
-int AEndlessTerrain::NumChunksInViewDistance() const {
-	return FGenericPlatformMath::RoundToInt(ViewDistance / ((VerticesInChunk - 1) * TileSize));
-}
-
 int AEndlessTerrain::CurrSectionIndex() const {
 	return TerrainMap.Num();
 }
@@ -211,10 +202,19 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 		}
 		return FVector2D(Location.X, Location.Y);
 	}();
+	const FIntPoint OriginChunkCoord = FIntPoint(FGenericPlatformMath::RoundToInt(Location2D.X / ChunkSize()), FGenericPlatformMath::RoundToInt(Location2D.Y / ChunkSize()));
+
+	UE_LOG(LogTemp, Display, TEXT("------------"));
+	for (const FIntPoint ChunkCoord : ChunksVisibleLastFrame) {
+		if (abs(ChunkCoord.X - OriginChunkCoord.X) > ChunksInViewDistance || 
+			abs(ChunkCoord.Y - OriginChunkCoord.Y) > ChunksInViewDistance) {
+			const FTerrainChunk& ChunkRef = TerrainMap[ChunkCoord];
+			Mesh->SetMeshSectionVisible(ChunkRef.GetSectionIndex(), false);
+		}
+	}
+	ChunksVisibleLastFrame.Empty();
 
 	// Test Chunks around Player Location
-	const FIntPoint OriginChunkCoord = FIntPoint(FGenericPlatformMath::RoundToInt(Location2D.X / ChunkSize()), FGenericPlatformMath::RoundToInt(Location2D.Y / ChunkSize()));
-	const int ChunksInViewDistance = NumChunksInViewDistance();
 	for (int YOffset = -ChunksInViewDistance; YOffset <= ChunksInViewDistance; ++YOffset) {
 		for (int XOffset = -ChunksInViewDistance; XOffset <= ChunksInViewDistance; ++XOffset) {
 			const FIntPoint CurrentChunkOffset = FIntPoint(XOffset, YOffset);
@@ -236,6 +236,8 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 
 				TerrainMap.Add(CurrentChunkCoord, std::move(Chunk));
 			}
+
+			ChunksVisibleLastFrame.Add(CurrentChunkCoord);
 		}
 	}
 }
