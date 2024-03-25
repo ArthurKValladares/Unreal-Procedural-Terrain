@@ -78,7 +78,9 @@ void NoiseMap::Init(ENormalizeMode NormalizeMode, int Seed, int W, int H, float 
 				}
 				case ENormalizeMode::Global: {
 					// TODO: Re-think this later
-					NoiseValues[NoiseIndex] = std::max(0.0, (NoiseValues[NoiseIndex] + 1) / (2. * MaxPossibleHeight / 1.75));
+					const float MinPossibleHeight = -MaxPossibleHeight;
+					const float BoundaryThreshold = 0.5;
+					NoiseValues[NoiseIndex] = InverseLerp(MinPossibleHeight * BoundaryThreshold, MaxPossibleHeight * BoundaryThreshold, NoiseValues[NoiseIndex]);
 					break;
 				}
 			}
