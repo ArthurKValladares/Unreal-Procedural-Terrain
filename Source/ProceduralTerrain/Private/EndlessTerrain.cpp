@@ -14,18 +14,6 @@ FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint ChunkCoor
 	Rect = FBox2D(Center - HalfSize, Center + HalfSize);
 	SectionIndex = ParentTerrain->CurrSectionIndex();
 
-	Noise.Init(
-		ENormalizeMode::Global, 
-		ParentTerrain->RandomSeed, 
-		AEndlessTerrain::VerticesInChunk,
-		AEndlessTerrain::VerticesInChunk,
-		ParentTerrain->Scale, 
-		ParentTerrain->Octaves, 
-		ParentTerrain->Persistance, 
-		ParentTerrain->Lacunarity, 
-		ChunkCoord * (AEndlessTerrain::VerticesInChunk)
-	);
-
 	const FName TextureName = FName(TEXT("NoiseTexture%d"), SectionIndex);
 	const int TextureSize = AEndlessTerrain::VerticesInChunk;
 	Texture = UTexture2D::CreateTransient(TextureSize, TextureSize, PF_B8G8R8A8, TextureName);
@@ -41,6 +29,8 @@ FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint ChunkCoor
 	ParentTerrain->Mesh->SetMaterial(SectionIndex, MaterialInstance);
 
 	CreateMesh(ParentTerrain);
+
+	UploadResources(ParentTerrain);
 }
 
 void FTerrainChunk::CreateMesh(AEndlessTerrain* ParentTerrain) {
@@ -81,7 +71,6 @@ void FTerrainChunk::CreateMesh(AEndlessTerrain* ParentTerrain) {
 	const int XStepOffset = StepSize;
 	const int YStepOffset = Width * StepSize;
 
-	TArray<int32> Triangles;
 	for (int Y = 0; Y < Height; Y += StepSize) {
 		for (int X = 0; X < Width; X += StepSize) {
 			if (Y < (Height - StepSize) && X < (Width - StepSize)) {
@@ -110,19 +99,26 @@ void FTerrainChunk::CreateMesh(AEndlessTerrain* ParentTerrain) {
 			}
 		}
 	}
-
-	// TODO: Not using Normal values atm
-	ParentTerrain->Mesh->CreateMeshSection_LinearColor(SectionIndex, Vertices, Triangles, {}, Uv0, {}, {}, false);
 }
 
 void FTerrainChunk::UpdateTexture(AEndlessTerrain* ParentTerrain) {
+	Noise.Init(
+		ENormalizeMode::Global,
+		ParentTerrain->RandomSeed,
+		AEndlessTerrain::VerticesInChunk,
+		AEndlessTerrain::VerticesInChunk,
+		ParentTerrain->Scale,
+		ParentTerrain->Octaves,
+		ParentTerrain->Persistance,
+		ParentTerrain->Lacunarity,
+		ChunkCoord * (AEndlessTerrain::VerticesInChunk)
+	);
+
 	const int Width = AEndlessTerrain::VerticesInChunk;
 	const int Height = AEndlessTerrain::VerticesInChunk;
 
-	FTexture2DMipMap* MipMap = &Texture->GetPlatformData()->Mips[0];
-	FByteBulkData* ImageData = &MipMap->BulkData;
-	uint8* RawImageData = (uint8*)ImageData->Lock(LOCK_READ_WRITE);
 	const int PixelSize = 4;
+	TextureData.SetNum(Width * Height * PixelSize);
 	for (int Y = 0; Y < Height; ++Y) {
 		for (int X = 0; X < Width; ++X) {
 			const int NoiseIndex = Y * Width + X;
@@ -134,22 +130,37 @@ void FTerrainChunk::UpdateTexture(AEndlessTerrain* ParentTerrain) {
 				if (NoiseValue <= Param.MaxHeight) {
 					const FColor Color = Param.Color;
 
-					RawImageData[TextureIndex] = Color.B;
-					RawImageData[TextureIndex + 1] = Color.G;
-					RawImageData[TextureIndex + 2] = Color.R;
-					RawImageData[TextureIndex + 3] = 255;
+					TextureData[TextureIndex] = Color.B;
+					TextureData[TextureIndex + 1] = Color.G;
+					TextureData[TextureIndex + 2] = Color.R;
+					TextureData[TextureIndex + 3] = 255;
 					break;
 				}
 			}
 #if DEBUG_DRAW
 			if (X == 0 || X == (Width - 1) || Y == 0 || Y == (Height - 1)) {
-				RawImageData[TextureIndex] = 0;
-				RawImageData[TextureIndex + 1] = 0;
-				RawImageData[TextureIndex + 2] = 255;
-				RawImageData[TextureIndex + 3] = 255;
+				TextureData[TextureIndex] = 0;
+				TextureData[TextureIndex + 1] = 0;
+				TextureData[TextureIndex + 2] = 255;
+				TextureData[TextureIndex + 3] = 255;
 			}
 #endif
 		}
+	}	
+}
+
+void FTerrainChunk::UploadResources(AEndlessTerrain * ParentTerrain) {
+	// TODO: Not using Normal values atm
+	ParentTerrain->Mesh->CreateMeshSection_LinearColor(SectionIndex, Vertices, Triangles, {}, Uv0, {}, {}, false);
+
+	const int Width = AEndlessTerrain::VerticesInChunk;
+	const int Height = AEndlessTerrain::VerticesInChunk;
+
+	FTexture2DMipMap* MipMap = &Texture->GetPlatformData()->Mips[0];
+	FByteBulkData* ImageData = &MipMap->BulkData;
+	uint8* RawImageData = (uint8*)ImageData->Lock(LOCK_READ_WRITE);
+	for (int I = 0; I < TextureData.Num(); ++I) {
+		RawImageData[I] = TextureData[I];
 	}
 	ImageData->Unlock();
 	Texture->UpdateResource();

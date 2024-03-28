@@ -7,13 +7,15 @@
 
 struct FTerrainChunk {
 	FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint ChunkCoord, float Size);
-	void CreateMesh(AEndlessTerrain* ParentTerrain);
 
 	int GetSectionIndex() const {
 		return SectionIndex;
 	}
 private:
+	void CreateMesh(AEndlessTerrain* ParentTerrain);
 	void UpdateTexture(AEndlessTerrain* ParentTerrain);
+
+	void UploadResources(AEndlessTerrain* ParentTerrain);
 
 	EMapLod MapLod;
 	FIntPoint ChunkCoord;
@@ -23,11 +25,14 @@ private:
 	NoiseMap Noise;
 
 	UMaterialInstanceDynamic* MaterialInstance;
+
+	TArray<uint8> TextureData;
 	UTexture2D* Texture;
 
 	// Mesh Data
 	TArray<FVector> Vertices;
 	TArray<FVector2D> Uv0;
+	TArray<int32> Triangles;
 };
 
 UCLASS()
