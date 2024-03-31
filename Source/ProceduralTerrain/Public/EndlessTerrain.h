@@ -8,14 +8,15 @@
 struct FTerrainChunk {
 	FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint ChunkCoord, float Size);
 
+	void CreateResources(AEndlessTerrain* ParentTerrain);
+	void UploadResources(AEndlessTerrain* ParentTerrain);
+
 	int GetSectionIndex() const {
 		return SectionIndex;
 	}
 private:
 	void CreateMesh(AEndlessTerrain* ParentTerrain);
 	void UpdateTexture(AEndlessTerrain* ParentTerrain);
-
-	void UploadResources(AEndlessTerrain* ParentTerrain);
 
 	EMapLod MapLod;
 	FIntPoint ChunkCoord;

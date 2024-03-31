@@ -21,16 +21,17 @@ FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint ChunkCoor
 	Texture->AddressX = TextureAddress::TA_Clamp;
 	Texture->AddressY = TextureAddress::TA_Clamp;
 	check(Texture);
-	UpdateTexture(ParentTerrain);
+	
 
 	MaterialInstance = UMaterialInstanceDynamic::Create(ParentTerrain->Material, ParentTerrain->Mesh);
 	check(MaterialInstance);
 	MaterialInstance->SetTextureParameterValue("NoiseTexture", Texture);
 	ParentTerrain->Mesh->SetMaterial(SectionIndex, MaterialInstance);
+}
 
+void FTerrainChunk::CreateResources(AEndlessTerrain* ParentTerrain) {
+	UpdateTexture(ParentTerrain);
 	CreateMesh(ParentTerrain);
-
-	UploadResources(ParentTerrain);
 }
 
 void FTerrainChunk::CreateMesh(AEndlessTerrain* ParentTerrain) {
@@ -244,6 +245,8 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 
 				// TODO: For now, all work in Chunk creation is done syncronously on main thread.
 				FTerrainChunk Chunk(this, CurrentChunkCoord, ChunkSize());
+				Chunk.CreateResources(this);
+				Chunk.UploadResources(this);
 
 				TerrainMap.Add(CurrentChunkCoord, std::move(Chunk));
 			}
