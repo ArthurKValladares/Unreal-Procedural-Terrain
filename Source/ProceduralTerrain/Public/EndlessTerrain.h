@@ -14,6 +14,11 @@ struct FTerrainChunk {
 	int GetSectionIndex() const {
 		return SectionIndex;
 	}
+
+	bool IsReadyToUpload() const {
+		return bReadyToUpload;
+	}
+
 private:
 	void CreateMesh(AEndlessTerrain* ParentTerrain);
 	void UpdateTexture(AEndlessTerrain* ParentTerrain);
@@ -34,6 +39,25 @@ private:
 	TArray<FVector> Vertices;
 	TArray<FVector2D> Uv0;
 	TArray<int32> Triangles;
+
+	bool bReadyToUpload = false;
+};
+
+struct FAsyncChunkGenerator : public FNonAbandonableTask {
+public:
+	FAsyncChunkGenerator(FTerrainChunk* Chunk, AEndlessTerrain* ParentTerrain) : 
+		Chunk(Chunk), 
+		ParentTerrain(ParentTerrain)
+	{}
+
+	FORCEINLINE TStatId GetStatId() const {
+		RETURN_QUICK_DECLARE_CYCLE_STAT(FAsyncChunkGenerator, STATGROUP_ThreadPoolAsyncTasks);
+	}
+
+	void DoWork();
+private:
+	FTerrainChunk* Chunk;
+	AEndlessTerrain* ParentTerrain;
 };
 
 UCLASS()

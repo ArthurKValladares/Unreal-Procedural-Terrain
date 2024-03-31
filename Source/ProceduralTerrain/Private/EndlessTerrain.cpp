@@ -32,6 +32,7 @@ FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint ChunkCoor
 void FTerrainChunk::CreateResources(AEndlessTerrain* ParentTerrain) {
 	UpdateTexture(ParentTerrain);
 	CreateMesh(ParentTerrain);
+	bReadyToUpload = true;
 }
 
 void FTerrainChunk::CreateMesh(AEndlessTerrain* ParentTerrain) {
@@ -167,6 +168,12 @@ void FTerrainChunk::UploadResources(AEndlessTerrain * ParentTerrain) {
 	Texture->UpdateResource();
 }
 
+void FAsyncChunkGenerator::DoWork()
+{
+	Chunk->CreateResources(ParentTerrain);
+}
+
+
 AEndlessTerrain::AEndlessTerrain()
 	: Scale(60.)
 	, Octaves(1)
@@ -227,6 +234,7 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 	ChunksVisibleLastFrame.Empty();
 
 	// Test Chunks around Player Location
+	TArray<FIntPoint> ChunksCreatedThisFrame;
 	for (int YOffset = -ChunksInViewDistance; YOffset <= ChunksInViewDistance; ++YOffset) {
 		for (int XOffset = -ChunksInViewDistance; XOffset <= ChunksInViewDistance; ++XOffset) {
 			const FIntPoint CurrentChunkOffset = FIntPoint(XOffset, YOffset);
@@ -238,21 +246,35 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 			if (TerrainMap.Contains(CurrentChunkCoord)) {
 				UE_LOG(LogTemp, Display, TEXT("Updating Chunk: (%d, %d)"), CurrentChunkCoord.X, CurrentChunkCoord.Y);
 
-				// TODO: Doing nothing atm
+				FTerrainChunk* ChunkPtr = TerrainMap.Find(CurrentChunkCoord);
+				if (ChunkPtr->IsReadyToUpload()) {
+					ChunkPtr->UploadResources(this);
+				}
 			}
 			else {
 				UE_LOG(LogTemp, Display, TEXT("Creating Chunk: (%d, %d)"), CurrentChunkCoord.X, CurrentChunkCoord.Y);
 
 				// TODO: For now, all work in Chunk creation is done syncronously on main thread.
 				FTerrainChunk Chunk(this, CurrentChunkCoord, ChunkSize());
-				Chunk.CreateResources(this);
-				Chunk.UploadResources(this);
-
+				//Chunk.CreateResources(this);
+				//Chunk.UploadResources(this);
 				TerrainMap.Add(CurrentChunkCoord, std::move(Chunk));
+				ChunksCreatedThisFrame.Add(CurrentChunkCoord);
 			}
 
 			ChunksVisibleLastFrame.Add(CurrentChunkCoord);
 		}
+	}
+
+	// TODO: This is probably still not completely right because the `ChunkPtr` can still get invalidated in between frames
+	for (const FIntPoint CurrentChunkCoord : ChunksCreatedThisFrame) {
+		FTerrainChunk* ChunkPtr = TerrainMap.Find(CurrentChunkCoord);
+		AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [ChunkPtr, this]() {
+			auto GenTask = new FAsyncTask<FAsyncChunkGenerator>(ChunkPtr, this);
+			GenTask->StartBackgroundTask();
+			GenTask->EnsureCompletion();
+			delete GenTask;
+		});
 	}
 }
 
