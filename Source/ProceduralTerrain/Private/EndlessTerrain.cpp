@@ -166,6 +166,8 @@ void FTerrainChunk::UploadResources(AEndlessTerrain * ParentTerrain) {
 	}
 	ImageData->Unlock();
 	Texture->UpdateResource();
+
+	bReadyToUpload = false;
 }
 
 void FAsyncChunkGenerator::DoWork()
