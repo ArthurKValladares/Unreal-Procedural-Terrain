@@ -113,7 +113,7 @@ void FTerrainChunk::UpdateTexture(AEndlessTerrain* ParentTerrain) {
 		ParentTerrain->Octaves,
 		ParentTerrain->Persistance,
 		ParentTerrain->Lacunarity,
-		ChunkCoord * (AEndlessTerrain::VerticesInChunk)
+		ChunkCoord * (AEndlessTerrain::VerticesInChunk - 1)
 	);
 
 	const int Width = AEndlessTerrain::VerticesInChunk;
@@ -249,6 +249,7 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 				UE_LOG(LogTemp, Display, TEXT("Updating Chunk: (%d, %d)"), CurrentChunkCoord.X, CurrentChunkCoord.Y);
 
 				FTerrainChunk* ChunkPtr = TerrainMap.Find(CurrentChunkCoord);
+				Mesh->SetMeshSectionVisible(ChunkPtr->GetSectionIndex(), true);
 				if (ChunkPtr->IsReadyToUpload()) {
 					ChunkPtr->UploadResources(this);
 				}
@@ -258,8 +259,6 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 
 				// TODO: For now, all work in Chunk creation is done syncronously on main thread.
 				FTerrainChunk Chunk(this, CurrentChunkCoord, ChunkSize());
-				//Chunk.CreateResources(this);
-				//Chunk.UploadResources(this);
 				TerrainMap.Add(CurrentChunkCoord, std::move(Chunk));
 				ChunksCreatedThisFrame.Add(CurrentChunkCoord);
 			}
