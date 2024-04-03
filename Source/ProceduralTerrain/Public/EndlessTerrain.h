@@ -16,7 +16,7 @@ struct FTerrainChunk {
 	}
 
 	bool IsReadyToUpload() const {
-		return bReadyToUpload;
+		return ReadyToUpload;
 	}
 
 private:
@@ -40,7 +40,7 @@ private:
 	TArray<FVector2D> Uv0;
 	TArray<int32> Triangles;
 
-	bool bReadyToUpload = false;
+	FThreadSafeBool ReadyToUpload = false;
 };
 
 struct FAsyncChunkGenerator : public FNonAbandonableTask {

@@ -32,7 +32,7 @@ FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint ChunkCoor
 void FTerrainChunk::CreateResources(AEndlessTerrain* ParentTerrain) {
 	UpdateTexture(ParentTerrain);
 	CreateMesh(ParentTerrain);
-	bReadyToUpload = true;
+	ReadyToUpload.AtomicSet(true);
 }
 
 void FTerrainChunk::CreateMesh(AEndlessTerrain* ParentTerrain) {
@@ -167,7 +167,7 @@ void FTerrainChunk::UploadResources(AEndlessTerrain * ParentTerrain) {
 	ImageData->Unlock();
 	Texture->UpdateResource();
 
-	bReadyToUpload = false;
+	ReadyToUpload.AtomicSet(false);
 }
 
 void FAsyncChunkGenerator::DoWork()
