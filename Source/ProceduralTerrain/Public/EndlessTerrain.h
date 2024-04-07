@@ -9,14 +9,19 @@ struct FTerrainChunk {
 	FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint ChunkCoord, float Size);
 
 	void CreateResources(AEndlessTerrain* ParentTerrain);
-	void UploadResources(AEndlessTerrain* ParentTerrain);
+	void UploadTexture(AEndlessTerrain* ParentTerrain);
+	void UploadMesh(AEndlessTerrain* ParentTerrain);
 
 	int GetSectionIndex() const {
 		return SectionIndex;
 	}
 
-	bool IsReadyToUpload() const {
-		return ReadyToUpload;
+	bool IsReadyToUploadMesh() const {
+		return ReadyToUploadMesh;
+	}
+
+	bool IsReadyToUploadTexture() const {
+		return ReadyToUploadTexture;
 	}
 
 private:
@@ -40,7 +45,8 @@ private:
 	TArray<FVector2D> Uv0;
 	TArray<int32> Triangles;
 
-	FThreadSafeBool ReadyToUpload = false;
+	FThreadSafeBool ReadyToUploadMesh = false;
+	FThreadSafeBool ReadyToUploadTexture = false;
 };
 
 struct FAsyncChunkGenerator : public FNonAbandonableTask {

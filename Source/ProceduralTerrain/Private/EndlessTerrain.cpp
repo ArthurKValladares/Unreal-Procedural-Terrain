@@ -31,8 +31,9 @@ FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint ChunkCoor
 
 void FTerrainChunk::CreateResources(AEndlessTerrain* ParentTerrain) {
 	UpdateTexture(ParentTerrain);
+	ReadyToUploadTexture.AtomicSet(true);
 	CreateMesh(ParentTerrain);
-	ReadyToUpload.AtomicSet(true);
+	ReadyToUploadMesh.AtomicSet(true);
 }
 
 void FTerrainChunk::CreateMesh(AEndlessTerrain* ParentTerrain) {
@@ -151,10 +152,7 @@ void FTerrainChunk::UpdateTexture(AEndlessTerrain* ParentTerrain) {
 	}	
 }
 
-void FTerrainChunk::UploadResources(AEndlessTerrain * ParentTerrain) {
-	// TODO: Not using Normal values atm
-	ParentTerrain->Mesh->CreateMeshSection_LinearColor(SectionIndex, Vertices, Triangles, {}, Uv0, {}, {}, false);
-
+void FTerrainChunk::UploadTexture(AEndlessTerrain* ParentTerrain) {
 	const int Width = AEndlessTerrain::VerticesInChunk;
 	const int Height = AEndlessTerrain::VerticesInChunk;
 
@@ -167,7 +165,14 @@ void FTerrainChunk::UploadResources(AEndlessTerrain * ParentTerrain) {
 	ImageData->Unlock();
 	Texture->UpdateResource();
 
-	ReadyToUpload.AtomicSet(false);
+	ReadyToUploadTexture.AtomicSet(false);
+}
+
+void FTerrainChunk::UploadMesh(AEndlessTerrain* ParentTerrain) {
+	// TODO: Not using Normal values atm
+	ParentTerrain->Mesh->CreateMeshSection_LinearColor(SectionIndex, Vertices, Triangles, {}, Uv0, {}, {}, false);
+
+	ReadyToUploadMesh.AtomicSet(false);
 }
 
 void FAsyncChunkGenerator::DoWork()
@@ -250,8 +255,11 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 
 				FTerrainChunk* ChunkPtr = TerrainMap.Find(CurrentChunkCoord);
 				Mesh->SetMeshSectionVisible(ChunkPtr->GetSectionIndex(), true);
-				if (ChunkPtr->IsReadyToUpload()) {
-					ChunkPtr->UploadResources(this);
+				if (ChunkPtr->IsReadyToUploadMesh()) {
+					ChunkPtr->UploadMesh(this);
+				}
+				if (ChunkPtr->IsReadyToUploadTexture()) {
+					ChunkPtr->UploadTexture(this);
 				}
 			}
 			else {
