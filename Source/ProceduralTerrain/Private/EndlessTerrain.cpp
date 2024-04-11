@@ -102,6 +102,8 @@ void FTerrainChunk::CreateMesh(AEndlessTerrain* ParentTerrain) {
 			}
 		}
 	}
+
+	UE_LOG(LogTemp, Display, TEXT("Updated Mesh Data at: (%d, %d)"), ChunkCoord.X, ChunkCoord.Y);
 }
 
 void FTerrainChunk::UpdateTexture(AEndlessTerrain* ParentTerrain) {
@@ -149,7 +151,8 @@ void FTerrainChunk::UpdateTexture(AEndlessTerrain* ParentTerrain) {
 			}
 #endif
 		}
-	}	
+	}
+	UE_LOG(LogTemp, Display, TEXT("Updated Texture Data at: (%d, %d)"), ChunkCoord.X, ChunkCoord.Y);
 }
 
 void FTerrainChunk::UploadTexture(AEndlessTerrain* ParentTerrain) {
@@ -166,6 +169,8 @@ void FTerrainChunk::UploadTexture(AEndlessTerrain* ParentTerrain) {
 	Texture->UpdateResource();
 
 	ReadyToUploadTexture.AtomicSet(false);
+
+	UE_LOG(LogTemp, Display, TEXT("Uploaded Texture Data at: (%d, %d)"), ChunkCoord.X, ChunkCoord.Y);
 }
 
 void FTerrainChunk::UploadMesh(AEndlessTerrain* ParentTerrain) {
@@ -173,6 +178,8 @@ void FTerrainChunk::UploadMesh(AEndlessTerrain* ParentTerrain) {
 	ParentTerrain->Mesh->CreateMeshSection_LinearColor(SectionIndex, Vertices, Triangles, {}, Uv0, {}, {}, false);
 
 	ReadyToUploadMesh.AtomicSet(false);
+
+	UE_LOG(LogTemp, Display, TEXT("Uploaded Mesh Data at: (%d, %d)"), ChunkCoord.X, ChunkCoord.Y);
 }
 
 void FAsyncChunkGenerator::DoWork()
