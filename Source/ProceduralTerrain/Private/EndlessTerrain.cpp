@@ -12,20 +12,10 @@ FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint ChunkCoor
 	const float HalfSize = (float)Size / 2.;
 
 	Rect = FBox2D(Center - HalfSize, Center + HalfSize);
-	SectionIndex = ParentTerrain->CurrSectionIndex();
-
-	const FName TextureName = FName(TEXT("NoiseTexture%d"), SectionIndex);
-	const int TextureSize = AEndlessTerrain::VerticesInChunk;
-	Texture = UTexture2D::CreateTransient(TextureSize, TextureSize, PF_B8G8R8A8, TextureName);
-	Texture->Filter = TextureFilter::TF_Nearest;
-	Texture->AddressX = TextureAddress::TA_Clamp;
-	Texture->AddressY = TextureAddress::TA_Clamp;
-	check(Texture);
-	
+	SectionIndex = ParentTerrain->CurrSectionIndex();	
 
 	MaterialInstance = UMaterialInstanceDynamic::Create(ParentTerrain->Material, ParentTerrain->Mesh);
 	check(MaterialInstance);
-	MaterialInstance->SetTextureParameterValue("NoiseTexture", Texture);
 	ParentTerrain->Mesh->SetMaterial(SectionIndex, MaterialInstance);
 }
 
@@ -135,17 +125,11 @@ void FTerrainChunk::UpdateTexture(AEndlessTerrain* ParentTerrain) {
 				if (NoiseValue <= Param.MaxHeight) {
 					const FColor Color = Param.Color;
 
-					/*
 					TextureData[TextureIndex] = Color.B;
 					TextureData[TextureIndex + 1] = Color.G;
 					TextureData[TextureIndex + 2] = Color.R;
 					TextureData[TextureIndex + 3] = 255;
-					*/
-					// TODO: TEMP FOR TESTING
-					TextureData[TextureIndex] = 255;
-					TextureData[TextureIndex + 1] = 255;
-					TextureData[TextureIndex + 2] = 255;
-					TextureData[TextureIndex + 3] = 255;
+
 					break;
 				}
 			}
@@ -166,6 +150,13 @@ void FTerrainChunk::UploadTexture(AEndlessTerrain* ParentTerrain) {
 	const int Width = AEndlessTerrain::VerticesInChunk;
 	const int Height = AEndlessTerrain::VerticesInChunk;
 
+	const FName TextureName = FName(TEXT("NoiseTexture%d"), SectionIndex);
+	Texture = UTexture2D::CreateTransient(Width, Height, PF_B8G8R8A8, TextureName);
+	Texture->Filter = TextureFilter::TF_Nearest;
+	Texture->AddressX = TextureAddress::TA_Clamp;
+	Texture->AddressY = TextureAddress::TA_Clamp;
+	check(Texture);
+
 	FTexture2DMipMap* MipMap = &Texture->GetPlatformData()->Mips[0];
 	FByteBulkData* ImageData = &MipMap->BulkData;
 	uint8* RawImageData = (uint8*)ImageData->Lock(LOCK_READ_WRITE);
@@ -174,6 +165,8 @@ void FTerrainChunk::UploadTexture(AEndlessTerrain* ParentTerrain) {
 	}
 	ImageData->Unlock();
 	Texture->UpdateResource();
+
+	MaterialInstance->SetTextureParameterValue("NoiseTexture", Texture);
 
 	ReadyToUploadTexture.AtomicSet(false);
 
