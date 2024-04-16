@@ -249,7 +249,6 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 
 	// Test Chunks around Player Location
 	TArray<FIntPoint> ChunksCreatedThisFrame;
-	/*
 	for (int YOffset = -ChunksInViewDistance; YOffset <= ChunksInViewDistance; ++YOffset) {
 		for (int XOffset = -ChunksInViewDistance; XOffset <= ChunksInViewDistance; ++XOffset) {
 			const FIntPoint CurrentChunkOffset = FIntPoint(XOffset, YOffset);
@@ -281,36 +280,6 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 
 			ChunksVisibleLastFrame.Add(CurrentChunkCoord);
 		}
-	}
-	*/
-	// TODO: TEMP FOR TESTING
-	{
-		const FIntPoint CurrentChunkCoord = FIntPoint(0,0);
-		const int DistanceInBlocksToOrigin = 0;
-		const EMapLod Lod = LodFromDistance(DistanceInBlocksToOrigin);
-
-		if (TerrainMap.Contains(CurrentChunkCoord)) {
-			//UE_LOG(LogTemp, Display, TEXT("Updating Chunk: (%d, %d)"), CurrentChunkCoord.X, CurrentChunkCoord.Y);
-
-			FTerrainChunk* ChunkPtr = TerrainMap.Find(CurrentChunkCoord);
-			Mesh->SetMeshSectionVisible(ChunkPtr->GetSectionIndex(), true);
-			if (ChunkPtr->IsReadyToUploadMesh()) {
-				ChunkPtr->UploadMesh(this);
-			}
-			if (ChunkPtr->IsReadyToUploadTexture()) {
-				ChunkPtr->UploadTexture(this);
-			}
-		}
-		else {
-			//UE_LOG(LogTemp, Display, TEXT("Creating Chunk: (%d, %d)"), CurrentChunkCoord.X, CurrentChunkCoord.Y);
-
-			// TODO: For now, all work in Chunk creation is done syncronously on main thread.
-			FTerrainChunk Chunk(this, CurrentChunkCoord, ChunkSize());
-			TerrainMap.Add(CurrentChunkCoord, std::move(Chunk));
-			ChunksCreatedThisFrame.Add(CurrentChunkCoord);
-		}
-
-		ChunksVisibleLastFrame.Add(CurrentChunkCoord);
 	}
 
 	// TODO: This is probably still not completely right because the `ChunkPtr` can still get invalidated in between frames
