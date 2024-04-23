@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// TODO: Maybe theres a smarter way to hanbdle the water that does not involve all these sub-meshes,
 
 #include "EndlessTerrain.h"
 
@@ -17,6 +17,7 @@ FTerrainChunk::FTerrainChunk(AEndlessTerrain* ParentTerrain, FIntPoint ChunkCoor
 	MaterialInstance = UMaterialInstanceDynamic::Create(ParentTerrain->Material, ParentTerrain->Mesh);
 	check(MaterialInstance);
 	ParentTerrain->Mesh->SetMaterial(SectionIndex, MaterialInstance);
+	ParentTerrain->WaterMesh->SetMaterial(SectionIndex, ParentTerrain->WaterMaterial);
 }
 
 void FTerrainChunk::CreateResources(AEndlessTerrain* ParentTerrain) {
@@ -38,7 +39,6 @@ void FTerrainChunk::CreateMesh(AEndlessTerrain* ParentTerrain) {
 	const int Width = AEndlessTerrain::VerticesInChunk;
 	const int Height = AEndlessTerrain::VerticesInChunk;
 
-	// TODO: This is what `Init` used to be
 	for (int Y = 0; Y < Height; ++Y) {
 		for (int X = 0; X < Width; ++X) {
 			// TODO: Duplicated code here, think about it soon, maybe save normalized noise instead of absolute
@@ -177,6 +177,23 @@ void FTerrainChunk::UploadMesh(AEndlessTerrain* ParentTerrain) {
 	// TODO: Not using Normal values atm
 	ParentTerrain->Mesh->CreateMeshSection_LinearColor(SectionIndex, Vertices, Triangles, {}, Uv0, {}, {}, false);
 
+	const FVector2D Center = Rect.GetCenter();
+	const float HalfChunkSize = AEndlessTerrain::ChunkSize() / 2.;
+	TArray<FVector> WaterVertices = {
+		FVector(Center.X - HalfChunkSize, Center.Y - HalfChunkSize, 0),
+		FVector(Center.X + HalfChunkSize, Center.Y - HalfChunkSize, 0),
+		FVector(Center.X - HalfChunkSize, Center.Y + HalfChunkSize, 0),
+		FVector(Center.X + HalfChunkSize, Center.Y + HalfChunkSize, 0)
+	};
+	TArray<FVector2D> WaterUv0 = { 
+		FVector2D(0., 0.),
+		FVector2D(1., 0.),
+		FVector2D(0., 1.),
+		FVector2D(1., 1.)
+	};
+	TArray<int32> WaterTriangles = {2, 1, 0, 3, 1, 2};
+	ParentTerrain->WaterMesh->CreateMeshSection_LinearColor(SectionIndex, WaterVertices, WaterTriangles, {}, WaterUv0, {}, {}, false);
+
 	ReadyToUploadMesh.AtomicSet(false);
 
 	UE_LOG(LogTemp, Display, TEXT("Uploaded Mesh Data at: (%d, %d)"), ChunkCoord.X, ChunkCoord.Y);
@@ -196,6 +213,8 @@ AEndlessTerrain::AEndlessTerrain()
 	, ChunksInViewDistance(2)
 	, Mesh(CreateDefaultSubobject<UProceduralMeshComponent>("EndlessMesh"))
 	, Material(CreateDefaultSubobject<UMaterial>("EndlessMaterial"))
+	, WaterMesh(CreateDefaultSubobject<UProceduralMeshComponent>("WaterMesh"))
+	, WaterMaterial(CreateDefaultSubobject<UMaterial>("WaterMaterial"))
 	, TerrainParams(FTerrainParams::GetParams())
 	, ElevationMultiplier(AEndlessTerrain::VerticesInChunk)
 	, ElevationCurve(CreateDefaultSubobject<UCurveFloat>("ElevationCurve"))
@@ -243,6 +262,7 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 			abs(ChunkCoord.Y - OriginChunkCoord.Y) > ChunksInViewDistance) {
 			const FTerrainChunk& ChunkRef = TerrainMap[ChunkCoord];
 			Mesh->SetMeshSectionVisible(ChunkRef.GetSectionIndex(), false);
+			WaterMesh->SetMeshSectionVisible(ChunkRef.GetSectionIndex(), false);
 		}
 	}
 	ChunksVisibleLastFrame.Empty();
@@ -261,13 +281,14 @@ void AEndlessTerrain::UpdateVisibleChunks() {
 				//UE_LOG(LogTemp, Display, TEXT("Updating Chunk: (%d, %d)"), CurrentChunkCoord.X, CurrentChunkCoord.Y);
 
 				FTerrainChunk* ChunkPtr = TerrainMap.Find(CurrentChunkCoord);
-				Mesh->SetMeshSectionVisible(ChunkPtr->GetSectionIndex(), true);
 				if (ChunkPtr->IsReadyToUploadMesh()) {
 					ChunkPtr->UploadMesh(this);
 				}
 				if (ChunkPtr->IsReadyToUploadTexture()) {
 					ChunkPtr->UploadTexture(this);
 				}
+				Mesh->SetMeshSectionVisible(ChunkPtr->GetSectionIndex(), true);
+				WaterMesh->SetMeshSectionVisible(ChunkPtr->GetSectionIndex(), true);
 			}
 			else {
 				//UE_LOG(LogTemp, Display, TEXT("Creating Chunk: (%d, %d)"), CurrentChunkCoord.X, CurrentChunkCoord.Y);

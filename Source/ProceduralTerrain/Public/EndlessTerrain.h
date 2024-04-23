@@ -95,8 +95,12 @@ class PROCEDURALTERRAIN_API AEndlessTerrain : public AActor
 	FCriticalSection MeshMutex;
 	UPROPERTY(VisibleAnywhere)
 	UProceduralMeshComponent* Mesh;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(VisibleAnywhere)
 	UMaterial* Material;
+	UPROPERTY(VisibleAnywhere)
+	UProceduralMeshComponent* WaterMesh;
+	UPROPERTY(VisibleAnywhere)
+	UMaterial* WaterMaterial;
 
 	UPROPERTY(EditAnywhere)
 	TArray<FTerrainParams> TerrainParams;
